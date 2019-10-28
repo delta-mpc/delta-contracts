@@ -9,8 +9,8 @@
   },
   "author": "maowei@yuanben.org",
   "license": "ISC",
-  "homepage": "https://github.com/EYBlockchain/nightfall",
-  "repository": "https://github.com/EYBlockchain/nightfall",
+  "homepage": "https://git.dev.yuanben.org/users/maowei/repos/smart-contract-utils/browse",
+  "repository": "https://git.dev.yuanben.org/users/maowei/repos/smart-contract-utils/browse",
   "dependencies": {
     "web3": "1.2.1",
     "solc": "^0.5.11",
