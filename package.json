@@ -1,0 +1,26 @@
+{
+  "name": "nightfall-contracts",
+  "version": "1.0.0",
+  "description": "Contracts for an Nightfall project.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "node main.js"
+  },
+  "author": "maowei@yuanben.org",
+  "license": "ISC",
+  "homepage": "https://github.com/EYBlockchain/nightfall",
+  "repository": "https://github.com/EYBlockchain/nightfall",
+  "dependencies": {
+    "web3": "1.2.1",
+    "solc": "^0.5.11",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7",
+    "ethereumjs-tx": "^2.1.1",
+    "secp256k1": "^3.7.1"
+  },
+  "engines": {
+    "node": "12.9.x",
+    "npm": "6.11.x"
+  }
+}

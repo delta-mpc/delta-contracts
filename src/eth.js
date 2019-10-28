@@ -1,0 +1,10 @@
+const Web3 = require('web3');
+const conf = require('./config');
+console.log('Blockchain Connecting ...');
+let web3 = new Web3();
+let provider = new Web3.providers.WebsocketProvider(conf.web3ProviderURL);
+provider.on('error', console.error);
+provider.on('connect', () => console.log('Blockchain Connected ...'));
+provider.on('end', console.error);
+web3.setProvider(provider);
+module.exports = web3;
