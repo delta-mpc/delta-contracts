@@ -15,8 +15,12 @@ function Contract(name, source = '', abi = '', byteCode = '', address = '') {
     this.address = address;
     this.txHash = '';
     this.receipt = null;
+    this.contract = null;
     if (byteCode === '') {
         this.get()
+    }
+    if (this.address !== '') {
+        this.contract = new web3.eth.Contract(this.abi, this.address);
     }
 }
 
@@ -112,8 +116,10 @@ Contract.prototype = {
       return this.address !== '';
     },
     methodData: async function (methodName, args = [], gasConfig = null, nonce = 0) {
-        let contract = new web3.eth.Contract(this.abi, this.address);
-        let method = contract.methods[methodName](...args);
+        if (!this.contract) {
+            this.contract = new web3.eth.Contract(this.abi, this.address);
+        }
+        let method = this.contract.methods[methodName](...args);
         return await txData(method.encodeABI(), this.address, nonce, gasConfig);
     },
     method: async function (methodName, args = [], gasConfig = null, nonce = 0) {
@@ -131,6 +137,28 @@ Contract.prototype = {
             console.log('调用方法 ' + methodName + ' 失败！');
             return null;
         }
+    },
+    decodeEvent: function (logs, eventName) {
+        let eventAbi = null;
+        for (let abi of this.abi) {
+            if (abi.name === eventName && abi.type === 'event') {
+                eventAbi = abi;
+                break
+            }
+        }
+        if (!eventAbi) {
+            console.log("event abi 未找到！");
+            return null
+        }
+        for (let log of logs) {
+            const topics = log.topics;
+            const data = log.data;
+            if (eventAbi.hasOwnProperty('signature') && topics.includes(eventAbi.signature)) {
+                return web3.eth.abi.decodeLog(eventAbi.inputs, data, topics.slice(1))
+            }
+        }
+        console.log("event log 未找到！");
+        return null
     }
 };
 
