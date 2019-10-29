@@ -19,10 +19,11 @@ const BN256G2 = new Contract('BN256G2');
 const GM17_v0 = new Contract('GM17_v0');
 
 async function deployContracts() {
-    await Verifier_Registry.deploy();
-    await BN256G2.deploy();
+    let gasConfig = {gasPrice: 1000000000};
+    await Verifier_Registry.deploy([], gasConfig);
+    await BN256G2.deploy([], gasConfig);
     GM17_v0.link(BN256G2);
-    await GM17_v0.deploy([Verifier_Registry.address]);
+    await GM17_v0.deploy([Verifier_Registry.address], gasConfig);
 }
 
 deployContracts().then(() => {
