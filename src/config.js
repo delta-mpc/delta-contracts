@@ -5,6 +5,6 @@ module.exports = {
     ethOpts: {
         chain: 'ropsten', hardfork: 'petersburg'
     },
-    gasPrice: '0x2540be400',
-    gasLimit: '0x7a1200',
+    gasPrice: 10000000000,
+    gasLimit: 8000000,
 };
