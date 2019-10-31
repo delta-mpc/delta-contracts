@@ -1,6 +1,6 @@
 node_modules
 .idea
-zkp/gm17
 compile
 migrations
 contracts
+zkp

@@ -16,6 +16,7 @@ function Contract(name, source = '', abi = '', byteCode = '', address = '') {
     this.txHash = '';
     this.receipt = null;
     this.contract = null;
+    this.logs = null;
     if (byteCode === '') {
         this.get()
     }
@@ -61,6 +62,8 @@ Contract.prototype = {
             catch (err) {
                 console.log(this.name + '.json加载失败：')
             }
+        } else {
+            console.log(file, '不存在')
         }
         return false
     },
@@ -86,6 +89,10 @@ Contract.prototype = {
         console.log(this.name + ' 合约编译数据获取失败！');
         process.exit();
     },
+    at: function(address) {
+        this.address = address;
+        this.contract = new web3.eth.Contract(this.abi, address);
+    },
     deployData: async function (args = [], gasConfig = null, nonce = 0) {
         let contract = new web3.eth.Contract(this.abi);
         let abiData = contract.deploy({
@@ -106,7 +113,7 @@ Contract.prototype = {
         if (this.receipt.status) {
             this.address = this.receipt.contractAddress;
             console.log(this.name + " 合约已成功部署，地址为:", this.address);
-            this.save()
+            await this.save()
         } else {
             console.log(this.name + ' 部署失败！');
             process.exit();
@@ -132,13 +139,14 @@ Contract.prototype = {
         });
         if (receipt.status) {
             console.log(this.name + ' 调用方法 ' + methodName + " 成功！");
+            this.logs = receipt.logs;
             return receipt;
         } else {
             console.log('调用方法 ' + methodName + ' 失败！');
             return null;
         }
     },
-    decodeEvent: function (logs, eventName) {
+    decodeEvent: function (eventName) {
         let eventAbi = null;
         for (let abi of this.abi) {
             if (abi.name === eventName && abi.type === 'event') {
@@ -150,15 +158,23 @@ Contract.prototype = {
             console.log("event abi 未找到！");
             return null
         }
-        for (let log of logs) {
+        for (let log of this.logs) {
             const topics = log.topics;
             const data = log.data;
             if (eventAbi.hasOwnProperty('signature') && topics.includes(eventAbi.signature)) {
-                return web3.eth.abi.decodeLog(eventAbi.inputs, data, topics.slice(1))
+                let log = web3.eth.abi.decodeLog(eventAbi.inputs, data, topics.slice(1));
+                console.log(eventName, "事件数据：", log);
+                return log
             }
         }
         console.log("event log 未找到！");
         return null
+    },
+    call:async function (methodName, args = []) {
+        if (!!this.contract) {
+            const method = this.contract.methods[methodName];
+            return await method(...args).call()
+        }
     }
 };
 
