@@ -5,13 +5,15 @@
 ## 主要功能
 1. 智能合约代码编译、链接、部署；
 2. 智能合约方法调用
+3. 智能合约eventLog解析
 ## 使用方法
 1. npm install
 2. 配置 ./src/config.js
 3. 将合约代码全部放到项目根目录的contracts文件夹中
 4. 使用工具集编写部署和调用的js脚本
 ## Example
-```javascript 1.8
+1. 部署
+```javascript
 const Contract = require('../src/contract');
 
 const Verifier_Registry = new Contract('Verifier_Registry');
@@ -28,6 +30,20 @@ async function deployContracts() {
 
 deployContracts().then(() => {
     console.log('所有操作已完成！');
+    process.exit();
+});
+```
+2.方法调用 & eventLog解析
+```javascript
+async function mint(A) {
+  const Contract = require('../src/contract');
+  console.log('mint一个 NF Token', A);
+  const nfToken = new Contract('NFTokenMetadata');
+  await nfToken.method('mint', [A, 'http://nightfall.nft.token/'+A]);
+  return nfToken.decodeEvent('Transfer')
+}
+mint(1).then(() => {
+    console.log('mint操作已完成！');
     process.exit();
 });
 ```
