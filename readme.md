@@ -9,8 +9,9 @@
 ## 使用方法
 1. npm install
 2. 配置 ./src/config.js
-3. 将合约代码全部放到项目根目录的contracts文件夹中
-4. 使用工具集编写部署和调用的js脚本
+3. 在项目根目录新建compile，用于存放合约编译信息
+4. 将合约代码全部放到项目根目录的contracts文件夹中
+5. 使用工具集编写部署和调用的js脚本
 ## Example
 1. 部署
 ```javascript
