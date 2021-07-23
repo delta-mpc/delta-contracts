@@ -1,4 +1,4 @@
-const Tx = require('ethereumjs-tx').Transaction;
+const Tx = require('@ethereumjs/tx').TransactionFactory;
 const conf = require('./config');
 
 const web3 = require('./eth');
@@ -40,9 +40,8 @@ async function txData(data, toAddress = '', nonce = 0, gasConfig = null) {
         nonce = await web3.eth.getTransactionCount(tra.from);
     }
     tra.nonce = web3.utils.toHex(nonce);
-    const tx = new Tx(tra, conf.ethOpts);
-    tx.sign(key);
-    return `0x${tx.serialize().toString('hex')}`;
+    let tx = Tx.fromTxData(tra, conf.ethOpts);
+    return `0x${tx.sign(key).serialize().toString('hex')}`;
 }
 
 module.exports = txData;

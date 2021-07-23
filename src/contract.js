@@ -7,19 +7,9 @@ const path = require('path');
 const fs = require('fs');
 
 
-function Contract(name, source = '', abi = '', byteCode = '', address = '') {
+function Contract(name) {
     this.name = name;
-    this.source = source;
-    this.abi = abi;
-    this.byteCode = byteCode;
-    this.address = address;
-    this.txHash = '';
-    this.receipt = null;
-    this.contract = null;
-    this.logs = null;
-    if (byteCode === '') {
-        this.get()
-    }
+    this.get()
     if (this.address !== '') {
         this.contract = new web3.eth.Contract(this.abi, this.address);
     }
@@ -58,8 +48,7 @@ Contract.prototype = {
                     this.txHash = contractData.txHash;
                     return true
                 }
-            }
-            catch (err) {
+            } catch (err) {
                 console.log(this.name + '.json加载失败：')
             }
         } else {
@@ -89,7 +78,7 @@ Contract.prototype = {
         console.log(this.name + ' 合约编译数据获取失败！');
         process.exit();
     },
-    at: function(address) {
+    at: function (address) {
         this.address = address;
         this.contract = new web3.eth.Contract(this.abi, address);
     },
@@ -119,8 +108,8 @@ Contract.prototype = {
             process.exit();
         }
     },
-    deployed: function() {
-      return this.address !== '';
+    deployed: function () {
+        return this.address !== '';
     },
     methodData: async function (methodName, args = [], gasConfig = null, nonce = 0) {
         if (!this.contract) {
@@ -170,7 +159,7 @@ Contract.prototype = {
         console.log("event log 未找到！");
         return null
     },
-    call:async function (methodName, args = []) {
+    call: async function (methodName, args = []) {
         if (!!this.contract) {
             const method = this.contract.methods[methodName];
             return await method(...args).call()

@@ -12,19 +12,22 @@
   "homepage": "https://git.dev.yuanben.org/users/maowei/repos/smart-contract-utils/browse",
   "repository": "https://git.dev.yuanben.org/users/maowei/repos/smart-contract-utils/browse",
   "dependencies": {
-    "web3": "1.2.1",
-    "solc": "^0.5.11",
-    "jsonfile": "^5.0.0",
+    "@ethereumjs/tx": "^3.3.0",
+    "big-integer": "^1.6.47",
     "fs": "^0.0.1-security",
-    "path": "^0.12.7",
-    "ethereumjs-tx": "^2.1.1",
-    "secp256k1": "^3.7.1",
-    "safe-buffer": "^5.2.0",
     "hex-to-binary": "^1.0.1",
-    "big-integer": "^1.6.47"
+    "jsonfile": "^5.0.0",
+    "path": "^0.12.7",
+    "safe-buffer": "^5.2.0",
+    "sha3": "^2.1.4",
+    "solc": "^0.8.0",
+    "web3": "1.4.0"
   },
   "engines": {
     "node": "12.9.x",
     "npm": "6.11.x"
+  },
+  "devDependencies": {
+    "@ethereumjs/common": "^2.4.0"
   }
 }
