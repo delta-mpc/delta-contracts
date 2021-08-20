@@ -1,10 +1,8 @@
-const Tx = require('@ethereumjs/tx').TransactionFactory;
-const conf = require('./config');
+import conf from './config.js'
+import web3 from './eth.js'
+import {TransactionFactory} from '@ethereumjs/tx'
 
-const web3 = require('./eth');
-
-async function txData(data, toAddress = '', nonce = 0, gasConfig = null) {
-
+async function txData(data, toAddress = '', nonce = 0, opt = null) {
     let key = new Buffer.from(conf.accounts[0].privateKey, 'hex');
     let tra = {
         gasPrice: '0x' + conf.gasPrice.toString(16),
@@ -12,23 +10,23 @@ async function txData(data, toAddress = '', nonce = 0, gasConfig = null) {
         data: data,
         from: conf.accounts[0].address,
     };
-    if (gasConfig !== null) {
-        if (gasConfig.hasOwnProperty('gasLimit')) {
-            tra.gasLimit = '0x' + gasConfig.gasLimit.toString(16);
+    if (opt !== null) {
+        if (opt.hasOwnProperty('gasLimit')) {
+            tra.gasLimit = '0x' + opt.gasLimit.toString(16);
         }
-        if (gasConfig.hasOwnProperty('gasPrice')) {
-            tra.gasPrice = '0x' + gasConfig.gasPrice.toString(16)
+        if (opt.hasOwnProperty('gasPrice')) {
+            tra.gasPrice = '0x' + opt.gasPrice.toString(16)
         }
-        if (gasConfig.hasOwnProperty('from')) {
+        if (opt.hasOwnProperty('from')) {
             for (let account of conf.accounts) {
-                if (account.address === gasConfig.from) {
-                    tra.from = gasConfig.from;
+                if (account.address === opt.from) {
+                    tra.from = opt.from;
                     key = new Buffer.from(account.privateKey, 'hex');
                     break
                 }
             }
-            if (tra.from !== gasConfig.from) {
-                console.log('地址', gasConfig.from, '不存在');
+            if (tra.from !== opt.from) {
+                console.log('地址', opt.from, '不存在');
                 process.exit();
             }
         }
@@ -40,8 +38,8 @@ async function txData(data, toAddress = '', nonce = 0, gasConfig = null) {
         nonce = await web3.eth.getTransactionCount(tra.from);
     }
     tra.nonce = web3.utils.toHex(nonce);
-    let tx = Tx.fromTxData(tra, conf.ethOpts);
+    let tx = TransactionFactory.fromTxData(tra, conf.ethOpts);
     return `0x${tx.sign(key).serialize().toString('hex')}`;
 }
 
-module.exports = txData;
+export default txData;

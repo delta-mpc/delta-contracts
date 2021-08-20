@@ -1,18 +1,17 @@
-const compile = require('./compile');
-const linker = require('solc/linker');
-const web3 = require('./eth');
-const txData = require('./tx');
-const jsonfile = require('jsonfile');
-const path = require('path');
-const fs = require('fs');
+import compile from "./compile.js";
+import * as linker from 'solc/linker.js'
+import web3 from "./eth.js";
+import txData from './tx.js'
+import jsonfile from 'jsonfile'
+import * as path from 'path'
+import * as fs from 'fs'
 
+const __dirname = path.resolve();
 
 function Contract(name) {
     this.name = name;
     this.get()
-    if (this.address !== '') {
-        this.contract = new web3.eth.Contract(this.abi, this.address);
-    }
+    this.at()
 }
 
 Contract.prototype = {
@@ -25,7 +24,7 @@ Contract.prototype = {
         this.byteCode = linker.linkBytecode(this.byteCode, lib)
     },
     save: async function () {
-        let filePath = path.resolve(__dirname, '..', "compile");
+        let filePath = path.resolve(__dirname, "compile");
         let file = path.join(filePath, this.name + '.json');
         try {
             await jsonfile.writeFile(file, this)
@@ -34,7 +33,7 @@ Contract.prototype = {
         }
     },
     load: function () {
-        let filePath = path.resolve(__dirname, '..', "compile");
+        let filePath = path.resolve(__dirname, "compile");
         let file = path.join(filePath, this.name + '.json');
         if (fs.existsSync(file)) {
             try {
@@ -70,7 +69,8 @@ Contract.prototype = {
                     this.abi = contractOutput[this.name].abi;
                     this.byteCode = contractOutput[this.name].evm.bytecode.object;
                     console.log(this.name + ' 合约编译数据获取成功！');
-                    this.save();
+                    this.save().then(() => {
+                    });
                     return
                 }
             }
@@ -79,63 +79,84 @@ Contract.prototype = {
         process.exit();
     },
     at: function (address) {
-        this.address = address;
-        this.contract = new web3.eth.Contract(this.abi, address);
+        if (!address) {
+            address = this.address
+        } else {
+            this.address = address
+        }
+        if (address) {
+            this.contract = new web3.eth.Contract(this.abi, address);
+            return true
+        } else {
+            return false
+        }
     },
-    deployData: async function (args = [], gasConfig = null, nonce = 0) {
+    deployData: async function (args = [], opt = null, nonce = 0) {
         let contract = new web3.eth.Contract(this.abi);
         let abiData = contract.deploy({
             data: '0x' + this.byteCode,
             arguments: args
         }).encodeABI();
-        return await txData(abiData, '', nonce, gasConfig);
+        return await txData(abiData, '', nonce, opt);
     },
-    deploy: async function (args = [], gasConfig = null, nonce = 0) {
-        let serializedTx = await this.deployData(args, gasConfig, nonce);
-        this.receipt = await web3.eth.sendSignedTransaction(serializedTx, (err, hash) => {
-            if (err) {
-                console.log("发送交易数据失败：" + err)
+    deploy: async function (args = [], opt = null, nonce = 0) {
+        try {
+            let serializedTx = await this.deployData(args, opt, nonce);
+            this.receipt = await web3.eth.sendSignedTransaction(serializedTx, (err, hash) => {
+                if (err) {
+                    console.log("发送交易数据失败：" + err)
+                }
+                this.txHash = hash;
+                console.log("部署合约：" + this.name + " txHash:" + this.txHash)
+            });
+            if (this.receipt.status) {
+                this.address = this.receipt.contractAddress;
+                console.log(this.name + " 合约已成功部署，地址为:", this.address);
+                await this.save()
+            } else {
+                console.log(this.name + ' 部署失败！');
+                process.exit();
             }
-            this.txHash = hash;
-            console.log("部署合约：" + this.name + " txHash:" + this.txHash)
-        });
-        if (this.receipt.status) {
-            this.address = this.receipt.contractAddress;
-            console.log(this.name + " 合约已成功部署，地址为:", this.address);
-            await this.save()
-        } else {
-            console.log(this.name + ' 部署失败！');
-            process.exit();
+        } catch (e) {
+            console.log('deploy: ', e)
         }
+
     },
-    deployed: function () {
-        return this.address !== '';
+    notDeployed: function () {
+        return !this.address;
     },
     methodData: async function (methodName, args = [], gasConfig = null, nonce = 0) {
-        if (!this.contract) {
-            this.contract = new web3.eth.Contract(this.abi, this.address);
+        if (this.at()) {
+            let method = this.contract.methods[methodName](...args);
+            let data = method.encodeABI()
+            return await txData(data, this.address, nonce, gasConfig);
+        } else {
+            throw 'methodData: no deployed contract'
         }
-        let method = this.contract.methods[methodName](...args);
-        return await txData(method.encodeABI(), this.address, nonce, gasConfig);
     },
     method: async function (methodName, args = [], gasConfig = null, nonce = 0) {
-        let serializedTx = await this.methodData(methodName, args, gasConfig, nonce);
-        let receipt = await web3.eth.sendSignedTransaction(serializedTx, (err, hash) => {
-            if (err) {
-                console.log("发送交易数据失败：" + err)
+        try {
+            let serializedTx = await this.methodData(methodName, args, gasConfig, nonce);
+            let receipt = await web3.eth.sendSignedTransaction(serializedTx, (err, hash) => {
+                if (err) {
+                    console.log("发送交易数据失败：" + err)
+                }
+                console.log(this.name + ' 调用方法 ' + methodName + " txHash:" + hash)
+            });
+            if (receipt.status) {
+                console.log(this.name + ' 调用方法 ' + methodName + " 成功！");
+                this.logs = receipt.logs;
+                return receipt;
+            } else {
+                console.log('调用方法 ' + methodName + ' 失败！');
+                return null;
             }
-            console.log(this.name + ' 调用方法 ' + methodName + " txHash:" + hash)
-        });
-        if (receipt.status) {
-            console.log(this.name + ' 调用方法 ' + methodName + " 成功！");
-            this.logs = receipt.logs;
-            return receipt;
-        } else {
-            console.log('调用方法 ' + methodName + ' 失败！');
-            return null;
+        } catch (e) {
+            console.log('method: ', e)
         }
+
     },
-    decodeEvent: function (eventName) {
+    decodeEvent: function (eventName, logs = null) {
         let eventAbi = null;
         for (let abi of this.abi) {
             if (abi.name === eventName && abi.type === 'event') {
@@ -147,7 +168,10 @@ Contract.prototype = {
             console.log("event abi 未找到！");
             return null
         }
-        for (let log of this.logs) {
+        if (logs == null) {
+            logs = this.logs
+        }
+        for (let log of logs) {
             const topics = log.topics;
             const data = log.data;
             if (eventAbi.hasOwnProperty('signature') && topics.includes(eventAbi.signature)) {
@@ -160,11 +184,15 @@ Contract.prototype = {
         return null
     },
     call: async function (methodName, args = []) {
-        if (!!this.contract) {
-            const method = this.contract.methods[methodName];
-            return await method(...args).call()
+        try {
+            if (this.at()) {
+                const method = this.contract.methods[methodName];
+                return await method(...args).call()
+            }
+        } catch (e) {
+            console.log('contract.call: ', e)
         }
     }
 };
 
-module.exports = Contract;
+export default Contract;
