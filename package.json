@@ -14,8 +14,11 @@
   "repository": "https://git.dev.yuanben.org/users/maowei/repos/smart-contract-utils/browse",
   "dependencies": {
     "@ethereumjs/tx": "^3.3.0",
+    "@grpc/grpc-js": "^1.2.3",
+    "@grpc/proto-loader": "^0.5.5",
     "big-integer": "^1.6.47",
     "fs": "^0.0.1-security",
+    "google-protobuf": "^3.14.0",
     "hex-to-binary": "^1.0.1",
     "jsonfile": "^5.0.0",
     "path": "^0.12.7",

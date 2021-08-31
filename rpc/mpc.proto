@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package mpc;
+
+service Mpc {
+  rpc registerNode(RegisterNodeRequest) returns (stream EventResponse) {}
+  rpc registerTask(RegisterTaskRequest) returns (stream EventResponse) {}
+  rpc joinTask(JoinTaskRequest) returns (stream EventResponse) {}
+  rpc train(TrainRequest) returns (stream EventResponse) {}
+  rpc key(KeyRequest) returns (stream EventResponse) {}
+  rpc event(EventRequest) returns (stream EventResponse) {}
+}
+
+message RegisterNodeRequest {
+  string url = 1;
+}
+
+message RegisterTaskRequest {}
+
+message JoinTaskRequest {
+  uint32 taskId = 1;
+}
+
+message TrainRequest {
+  uint32 taskId = 1;
+}
+
+message KeyRequest {
+  uint32 taskId = 1;
+  uint32 epoch = 2;
+  bytes key = 3;
+}
+
+message EventRequest {}
+
+message EventResponse {
+  string name = 1;
+  string address = 2;
+  string url = 3;
+  uint32 taskId = 4;
+  uint32 epoch = 5;
+  string key = 6;
+}
