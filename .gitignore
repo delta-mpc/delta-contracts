@@ -1,7 +1,4 @@
 node_modules
 .idea
 compile
-migrations
-contracts
-zkp
 test.js

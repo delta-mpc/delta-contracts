@@ -24,10 +24,6 @@
     "solc": "^0.8.0",
     "web3": "1.4.0"
   },
-  "engines": {
-    "node": "12.9.x",
-    "npm": "6.11.x"
-  },
   "devDependencies": {
     "@ethereumjs/common": "^2.4.0"
   }
