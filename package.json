@@ -6,7 +6,8 @@
   "main": "main.js",
   "scripts": {
     "test": "node test.js",
-    "deploy": "node migrations/nightfall_migrations.js"
+    "deploy": "node migrations/nightfall_migrations.js",
+    "server": "node rpc/server.js"
   },
   "author": "maowei@yuanben.org",
   "license": "ISC",
@@ -24,7 +25,7 @@
     "path": "^0.12.7",
     "safe-buffer": "^5.2.0",
     "sha3": "^2.1.4",
-    "solc": "^0.8.0",
+    "solc": "0.8.6",
     "web3": "1.4.0"
   },
   "devDependencies": {

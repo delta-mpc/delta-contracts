@@ -1,4 +1,4 @@
-import conf from './config.js'
+import conf from '../config/config.js'
 import web3 from './eth.js'
 import {TransactionFactory} from '@ethereumjs/tx'
 

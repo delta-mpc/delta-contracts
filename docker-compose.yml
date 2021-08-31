@@ -1,0 +1,12 @@
+version: "3.1"
+
+services:
+  rpc:
+    build: .
+    container_name: delta-contract-rpc
+    image: deltampc/delta-contract:dev
+    ports:
+      - "4500:4500"
+    environment:
+      ADDRESS: ""
+      PRIVATE_KEY: ""

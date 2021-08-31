@@ -6,17 +6,23 @@ contract Mpc {
     mapping(address => string) nodes;
     mapping(address => mapping(uint => uint8)) task_members;
     uint32[] task_train_epoch;
+    address[] public nodeList;
 
     event Node(address indexed node, string url);
-    event Task(address indexed node, uint32 indexed task_id, string url);
-    event Join(address indexed node, uint32 indexed task_id);
-    event Train(uint32 indexed epoch, uint32 indexed task_id);
-    event PublicKey(address indexed node, uint32 indexed epoch, uint32 indexed task_id, bytes key);
+    event Task(address indexed node, uint32 indexed taskId, string url);
+    event Join(address indexed node, uint32 indexed taskId);
+    event Train(uint32 indexed epoch, uint32 indexed taskId);
+    event PublicKey(address indexed node, uint32 indexed epoch, uint32 indexed taskId, bytes key);
 
     function registerNode(string memory url) public {
         address node = msg.sender;
         nodes[node] = url;
+        nodeList.push(node);
         emit Node(node, url);
+    }
+
+    function NodeTotal() public view returns (uint) {
+        return nodeList.length;
     }
 
     function getNode() public view returns (string memory) {

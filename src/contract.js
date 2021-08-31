@@ -48,7 +48,7 @@ Contract.prototype = {
                     return true
                 }
             } catch (err) {
-                console.log(this.name + '.json加载失败：')
+                console.log(this.name + '.json加载失败：', err)
             }
         } else {
             console.log(file, '不存在')
@@ -156,28 +156,20 @@ Contract.prototype = {
         }
 
     },
-    decodeEvent: function (eventName, logs = null) {
-        let eventAbi = null;
-        for (let abi of this.abi) {
-            if (abi.name === eventName && abi.type === 'event') {
-                eventAbi = abi;
-                break
-            }
-        }
-        if (!eventAbi) {
-            console.log("event abi 未找到！");
-            return null
-        }
+    decodeEvent: function (logs = null) {
         if (logs == null) {
             logs = this.logs
         }
         for (let log of logs) {
             const topics = log.topics;
             const data = log.data;
-            if (eventAbi.hasOwnProperty('signature') && topics.includes(eventAbi.signature)) {
-                let log = web3.eth.abi.decodeLog(eventAbi.inputs, data, topics.slice(1));
-                console.log(eventName, "事件数据：", log);
-                return log
+            for (let abi of this.abi) {
+                if (abi.hasOwnProperty('signature') && topics.includes(abi.signature)) {
+                    let log = web3.eth.abi.decodeLog(abi.inputs, data, topics.slice(1));
+                    log.name = abi.name
+                    console.log("事件数据：", log);
+                    return log
+                }
             }
         }
         console.log("event log 未找到！");

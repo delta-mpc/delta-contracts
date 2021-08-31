@@ -9,6 +9,7 @@ service Mpc {
   rpc train(TrainRequest) returns (stream EventResponse) {}
   rpc key(KeyRequest) returns (stream EventResponse) {}
   rpc event(EventRequest) returns (stream EventResponse) {}
+  rpc getNodes(NodesRequest) returns (stream NodesResponse) {}
 }
 
 message RegisterNodeRequest {
@@ -32,12 +33,17 @@ message KeyRequest {
 }
 
 message EventRequest {}
+message NodesRequest {}
 
 message EventResponse {
   string name = 1;
-  string address = 2;
+  string node = 2;
   string url = 3;
   uint32 taskId = 4;
   uint32 epoch = 5;
   string key = 6;
+}
+
+message NodesResponse {
+  string node = 1;
 }

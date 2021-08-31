@@ -6,8 +6,8 @@ let customChain = Common.custom({chainId: 42, name: 'delta'})
 const conf = {
     accounts: [
         {
-            address: '0x6e28858bc01946c924d3255588a7e2f727f58c7a',
-            privateKey: 'e3f9efed5e1708662faf73b55ea3f175bfb0a53dfd892dbe4e86402ec07c81d5',
+            address: process.env.ADDRESS ? process.env.ADDRESS : '0x6e28858bc01946c924d3255588a7e2f727f58c7a',
+            privateKey: process.env.PRIVATE_KEY ? process.env.PRIVATE_KEY : 'e3f9efed5e1708662faf73b55ea3f175bfb0a53dfd892dbe4e86402ec07c81d5',
         },
         {
             address: '0x242b7c50babbf087d4a73fe669bd0ffa1208233a',
