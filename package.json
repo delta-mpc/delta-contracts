@@ -6,7 +6,7 @@
   "main": "main.js",
   "scripts": {
     "test": "node test.js",
-    "deploy": "node migrations/nightfall_migrations.js",
+    "deploy": "node src/deploy.js",
     "server": "node rpc/server.js"
   },
   "author": "maowei@yuanben.org",

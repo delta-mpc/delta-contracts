@@ -14,7 +14,7 @@ const conf = {
             privateKey: '4c37340e31bd665979a875a211ad47905c041b3b821b67e7d416bd97fc58a8e6',
         }
     ],
-    web3ProviderURL: 'wss://node.delta.yuanben.org',
+    web3ProviderURL: process.env.WS_URL ? process.env.WS_URL : 'wss://node.delta.yuanben.org',
     ethOpts: {
         common: customChain
     },
