@@ -1,0 +1,361 @@
+{
+	"compiler": {
+		"version": "0.8.7+commit.e28d00a7"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "contract DeltaContract",
+						"name": "ct",
+						"type": "address"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "dataSet",
+						"type": "string"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "tskCmmtmnt",
+						"type": "bytes32"
+					}
+				],
+				"name": "createTask",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "taskId",
+						"type": "bytes32"
+					}
+				],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "taskId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "address",
+						"name": "clientaddress",
+						"type": "address"
+					},
+					{
+						"internalType": "uint64",
+						"name": "round",
+						"type": "uint64"
+					}
+				],
+				"name": "getCommitment",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "bytes",
+								"name": "weightCommitment",
+								"type": "bytes"
+							},
+							{
+								"internalType": "bytes",
+								"name": "seedCmmtmnt",
+								"type": "bytes"
+							},
+							{
+								"internalType": "bytes",
+								"name": "secretKeyMaskCmmtmnt",
+								"type": "bytes"
+							}
+						],
+						"internalType": "struct DeltaContract.CommitmentData",
+						"name": "commitment",
+						"type": "tuple"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "taskId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint64",
+						"name": "round",
+						"type": "uint64"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "pk1",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "pk2",
+						"type": "bytes32"
+					}
+				],
+				"name": "joinRound",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "nop",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "taskId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint64",
+						"name": "round",
+						"type": "uint64"
+					},
+					{
+						"internalType": "address[]",
+						"name": "cltaddrs",
+						"type": "address[]"
+					}
+				],
+				"name": "selectCandidates",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint64",
+						"name": "maxLength",
+						"type": "uint64"
+					}
+				],
+				"name": "setMaxSSCommitmentLength",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint64",
+						"name": "maxLength",
+						"type": "uint64"
+					}
+				],
+				"name": "setMaxWeightCommitmentLength",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "taskId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint64",
+						"name": "round",
+						"type": "uint64"
+					},
+					{
+						"internalType": "address[]",
+						"name": "onlineClients",
+						"type": "address[]"
+					}
+				],
+				"name": "startAggregate",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "taskId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint64",
+						"name": "round",
+						"type": "uint64"
+					},
+					{
+						"internalType": "uint32",
+						"name": "maxSample",
+						"type": "uint32"
+					},
+					{
+						"internalType": "uint32",
+						"name": "minSample",
+						"type": "uint32"
+					},
+					{
+						"internalType": "uint32",
+						"name": "joinTimeout",
+						"type": "uint32"
+					},
+					{
+						"internalType": "uint32",
+						"name": "computTimeout",
+						"type": "uint32"
+					}
+				],
+				"name": "startRound",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "taskId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint64",
+						"name": "round",
+						"type": "uint64"
+					},
+					{
+						"internalType": "bytes",
+						"name": "weightCommitment",
+						"type": "bytes"
+					}
+				],
+				"name": "uploadSeedCommitment",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "taskId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint64",
+						"name": "round",
+						"type": "uint64"
+					},
+					{
+						"internalType": "bytes",
+						"name": "weightCommitment",
+						"type": "bytes"
+					}
+				],
+				"name": "uploadSkMaskCommitment",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "taskId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint64",
+						"name": "round",
+						"type": "uint64"
+					},
+					{
+						"internalType": "bytes",
+						"name": "weightCommitment",
+						"type": "bytes"
+					}
+				],
+				"name": "uploadWeightCommitment",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"tests/lib/Test_Participant.sol": "Participant"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/DeltaContract.sol": {
+			"keccak256": "0x5bfd9c6ab06ce44d3a4446b595036a2978c0dbc3e8be9f4eca2d15f8430fb939",
+			"license": "GPL-3.0",
+			"urls": [
+				"bzz-raw://70c639cdea9505050b4f8d66390a0c10261a8a08d56d89cc511838eace547fb1",
+				"dweb:/ipfs/QmawscwJ4mLx1XApjozBRbVkZL4ZHvtE8cK65cGfvRPEMV"
+			]
+		},
+		"tests/lib/Test_Participant.sol": {
+			"keccak256": "0xca44139b6143b05a3416c78d958d087ebc8ef2b33bdeede5d42a6df9f32dd60a",
+			"license": "GPL-3.0",
+			"urls": [
+				"bzz-raw://812219656c17dbe855a4644afa26087281a954dba92608c414073fbab1148132",
+				"dweb:/ipfs/QmexvTZLyGadCUuDQCuAb9CA6UpFet5hddE2WhkB2AiPkb"
+			]
+		}
+	},
+	"version": 1
+}

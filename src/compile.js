@@ -8,8 +8,11 @@ export default function compile() {
     const filePath = path.resolve(__dirname, "contracts");
     let sources = {};
     fs.readdirSync(filePath).forEach(file => {
-        let sourceCode = fs.readFileSync(path.join(filePath, file), 'UTF-8');
-        sources[file] = {content: sourceCode};
+        if(file.endsWith(".sol")) {
+         console.log(file);
+         let sourceCode = fs.readFileSync(path.join(filePath, file), 'UTF-8');
+         sources[file] = {content: sourceCode};
+        }
     });
     let input = {
         language: 'Solidity',

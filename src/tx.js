@@ -1,6 +1,7 @@
 import conf from '../config/config.js'
 import web3 from './eth.js'
-import {TransactionFactory} from '@ethereumjs/tx'
+import pkg from '@ethereumjs/tx';
+const {TransactionFactory} = pkg;
 
 async function txData(data, toAddress = '', nonce = 0, opt = null) {
     let key = new Buffer.from(conf.accounts[0].privateKey, 'hex');
