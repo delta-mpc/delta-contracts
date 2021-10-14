@@ -34,6 +34,7 @@ contract DeltaContract {
         uint32 minSample;
         RoundStatus status;
         mapping(address=>Candidate) candidates;
+        address[] joinedAddrs;
         uint256 roundStartBlockNum;
         uint256 calcStartBlockNum;
         uint32 joinTimeout;
@@ -47,6 +48,7 @@ contract DeltaContract {
         RoundStatus status;
         uint256 roundStartBlockNum;
         uint256 calcStartBlockNum;
+        address[] joinedAddrs;
         uint32 joinTimeout;
         uint32 computTimeout;
     }
@@ -168,6 +170,7 @@ contract DeltaContract {
         require(thisRound.roundStartBlockNum + thisRound.joinTimeout >= block.number,"Join deadline has passed");
         require(thisRound.candidates[msg.sender].pk1 == 0x0,"Cannot join the same round multiple times");
         thisRound.candidates[msg.sender] = Candidate({pk1:pk1,pk2:pk2});
+        thisRound.joinedAddrs.push(msg.sender);
         return true;
     }
     
@@ -187,7 +190,8 @@ contract DeltaContract {
         taskround = ExtCallTaskRoundStruct({currentRound:temp.currentRound,maxSample:temp.maxSample,minSample:temp.minSample,status:temp.status,roundStartBlockNum:temp.roundStartBlockNum,
             calcStartBlockNum:temp.calcStartBlockNum,
             joinTimeout:temp.joinTimeout,
-            computTimeout:temp.computTimeout
+            computTimeout:temp.computTimeout,
+            joinedAddrs:temp.joinedAddrs
         });
     }
     
@@ -235,6 +239,7 @@ contract DeltaContract {
         }
         emit AggregatingStarted(taskId,round,onlineClients);
     }
+    
     
     /**
      * @dev called by task developer, close round

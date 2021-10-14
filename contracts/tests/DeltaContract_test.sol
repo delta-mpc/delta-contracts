@@ -84,6 +84,9 @@ contract DeltaContractTest {
         } catch Error (string memory error) {
             Assert.equal(error,"Cannot join the same round multiple times","joinRoundTests failed");
         }
+        DeltaContract.ExtCallTaskRoundStruct memory round = dContract.getTaskRound(t_id,1);
+        Assert.equal(round.joinedAddrs.length,1,"joinRoundTests failed");
+        Assert.equal(round.joinedAddrs[0],address(clientA),"joinRoundTests failed");
     }
     function createTaskJoinRoundTimeout() public {
          timeoutTaskId = taskDeveloper.createTask("myDataSet",0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e03);
