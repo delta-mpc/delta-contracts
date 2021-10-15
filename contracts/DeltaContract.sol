@@ -9,7 +9,7 @@ pragma solidity >=0.7.0 <0.9.0;
 contract DeltaContract {
 
     address private owner;
-    enum RoundStatus {Started,Running,Aggregating,Finished}
+    enum RoundStatus {Started,Running,AggregatUploading,Aggregating,Finished}
     mapping(bytes32 => Task) createdTasks;
     mapping(bytes32 => TaskRound[]) taskRounds;
     mapping(bytes32 => RoundModelCommitments[]) roundModelCommitments;
@@ -35,10 +35,6 @@ contract DeltaContract {
         RoundStatus status;
         mapping(address=>Candidate) candidates;
         address[] joinedAddrs;
-        uint256 roundStartBlockNum;
-        uint256 calcStartBlockNum;
-        uint32 joinTimeout;
-        uint32 computTimeout;
     }
     
     struct ExtCallTaskRoundStruct {
@@ -46,11 +42,7 @@ contract DeltaContract {
         uint32 maxSample;
         uint32 minSample;
         RoundStatus status;
-        uint256 roundStartBlockNum;
-        uint256 calcStartBlockNum;
         address[] joinedAddrs;
-        uint32 joinTimeout;
-        uint32 computTimeout;
     }
     
     struct CommitmentData {
@@ -66,8 +58,16 @@ contract DeltaContract {
     event RoundStart(bytes32 taskId,uint64 round);
     // triggered when task developer call selectCandidates
     event PartnerSelected(bytes32 taskId,uint64 round,address[] addrs);
+    
+    // triggered when task developer call startAggregateUpload
+    event AggregatUploadStarted(bytes32 taskId,uint64 round,address[] onlineClients);
+    
+    
     // triggered when task developer call startAggregate
-    event AggregatingStarted(bytes32 taskId,uint64 round,address[] onlineClients);
+    event AggregatStarted(bytes32 taskId,uint64 round);
+    
+    // triggered when client call uploadWeightCommitment , uploadSeedCommitment ,uploadSkMaskCommitment
+    event CommitmentUploaded(bytes32 taskId,uint64 round,address client,string commitmentType,bytes weightCommitment);
     
     // modifier to check if caller is owner
     modifier isOwner() {
@@ -133,12 +133,12 @@ contract DeltaContract {
          emit TaskCreated(msg.sender,task_id,dataSet,commitment);
     }
     
-     /**
-      * @dev called by task developer, notifying all clients that a new computing round is started and open for joining
-      * @param taskId taskId
-      * @param round the round to start
-      */
-    function startRound(bytes32 taskId,uint64 round,uint32 maxSample,uint32 minSample,uint32 joinTimeout,uint32 computTimeout) taskExists(taskId) taskOwner(taskId) public {
+    /**
+     * @dev called by task developer, notifying all clients that a new computing round is started and open for joining
+     * @param taskId taskId
+     * @param round the round to start
+     */
+    function startRound(bytes32 taskId,uint64 round,uint32 maxSample,uint32 minSample) taskExists(taskId) taskOwner(taskId) public {
         TaskRound[] storage rounds = taskRounds[taskId];
         require(rounds.length == round,"the round has been already started or the pre round does not exist");
         Task storage task = createdTasks[taskId];
@@ -148,10 +148,6 @@ contract DeltaContract {
         rounds[round].maxSample = maxSample;
         rounds[round].minSample = minSample;
         rounds[round].status = RoundStatus.Started;
-        rounds[round].roundStartBlockNum = block.number;
-        rounds[round].calcStartBlockNum = 0;
-        rounds[round].joinTimeout = joinTimeout;
-        rounds[round].computTimeout = computTimeout;
         RoundModelCommitments[] storage cmmts = roundModelCommitments[taskId];
         cmmts.push();
         emit RoundStart(taskId,round);
@@ -167,7 +163,7 @@ contract DeltaContract {
     function joinRound(bytes32 taskId,uint64 round,bytes32 pk1,bytes32 pk2) taskExists(taskId) roundExists(taskId,round) public returns(bool){
         TaskRound[] storage rounds = taskRounds[taskId];
         TaskRound storage thisRound = rounds[rounds.length - 1];
-        require(thisRound.roundStartBlockNum + thisRound.joinTimeout >= block.number,"Join deadline has passed");
+        require(thisRound.status == RoundStatus.Started,"join phase has passed");
         require(thisRound.candidates[msg.sender].pk1 == 0x0,"Cannot join the same round multiple times");
         thisRound.candidates[msg.sender] = Candidate({pk1:pk1,pk2:pk2});
         thisRound.joinedAddrs.push(msg.sender);
@@ -187,10 +183,7 @@ contract DeltaContract {
       */
     function getTaskRound(bytes32 taskId,uint64 round) roundExists(taskId,round) public view returns(ExtCallTaskRoundStruct memory taskround) {
         TaskRound storage temp = taskRounds[taskId][round];
-        taskround = ExtCallTaskRoundStruct({currentRound:temp.currentRound,maxSample:temp.maxSample,minSample:temp.minSample,status:temp.status,roundStartBlockNum:temp.roundStartBlockNum,
-            calcStartBlockNum:temp.calcStartBlockNum,
-            joinTimeout:temp.joinTimeout,
-            computTimeout:temp.computTimeout,
+        taskround = ExtCallTaskRoundStruct({currentRound:temp.currentRound,maxSample:temp.maxSample,minSample:temp.minSample,status:temp.status,
             joinedAddrs:temp.joinedAddrs
         });
     }
@@ -205,7 +198,6 @@ contract DeltaContract {
         for(uint i = 0; i < cltaddrs.length; i ++) {
             require(curRound.candidates[cltaddrs[i]].pk1 != 0x00,"Candidate must exist");
         }
-        curRound.calcStartBlockNum = block.number;
         curRound.status = RoundStatus.Running;
         emit PartnerSelected(taskId,round,cltaddrs);
     }
@@ -226,27 +218,39 @@ contract DeltaContract {
     }
     
     /**
+     * @dev called by task developer, notifying all participants for upload secret sharing masks
+     * @param taskId taskId
+     * @param round the task round
+     */
+    function startAggregateUpload(bytes32 taskId,uint64 round,address[] calldata onlineClients) taskOwner(taskId) roundExists(taskId,round) public {
+        TaskRound storage curRound = taskRounds[taskId][round];
+        require(curRound.status == RoundStatus.Running,"This round is not running now");
+        curRound.status = RoundStatus.AggregatUploading;
+        for(uint i = 0; i < onlineClients.length; i ++) {
+            require(curRound.candidates[onlineClients[i]].pk1 != 0x00,"Candidate must exist");
+        }
+        emit AggregatUploadStarted(taskId,round,onlineClients);
+    }
+    
+    
+     /**
      * @dev called by task developer, notifying all participants for aggregating
      * @param taskId taskId
      * @param round the task round
      */
-    function startAggregate(bytes32 taskId,uint64 round,address[] calldata onlineClients) taskOwner(taskId) roundExists(taskId,round) public {
+    function startAggregate(bytes32 taskId,uint64 round) taskOwner(taskId) roundExists(taskId,round) public {
         TaskRound storage curRound = taskRounds[taskId][round];
-        require(curRound.status == RoundStatus.Running,"This round is not running now");
+        require(curRound.status == RoundStatus.AggregatUploading,"AggregatUploading has not started");
         curRound.status = RoundStatus.Aggregating;
-        for(uint i = 0; i < onlineClients.length; i ++) {
-            require(curRound.candidates[onlineClients[i]].pk1 != 0x00,"Candidate must exist");
-        }
-        emit AggregatingStarted(taskId,round,onlineClients);
+        emit AggregatStarted(taskId,round);
     }
-    
     
     /**
      * @dev called by task developer, close round
      * @param taskId taskId
      * @param round the task round
      */
-    function endRound(bytes32 taskId,uint64 round) taskOwner(taskId) roundExists(taskId,round) public {
+    function startRound(bytes32 taskId,uint64 round) taskOwner(taskId) roundExists(taskId,round) public {
         TaskRound storage curRound = taskRounds[taskId][round];
         curRound.status = RoundStatus.Finished;
     }
@@ -258,16 +262,17 @@ contract DeltaContract {
      * @param weightCommitment masked model incremental commitment
      */
     function uploadWeightCommitment(bytes32 taskId,uint64 round,bytes calldata weightCommitment) roundExists(taskId,round) public {
-        require(weightCommitment.length <= maxWeightCommitmentLength,"commitment length exceeds limit");
+        require(weightCommitment.length > 0 && weightCommitment.length <= maxWeightCommitmentLength,"commitment length exceeds limit or it is empty");
         TaskRound storage curRound = taskRounds[taskId][round];
-        require(curRound.status == RoundStatus.Running,"This round is not running now");
-        require(curRound.calcStartBlockNum + curRound.computTimeout >= block.number,"upload deadline has passed");
+        require(curRound.status == RoundStatus.Running ,"This round is not running now or it has expired");
         RoundModelCommitments[] storage commitments = roundModelCommitments[taskId];
         if(commitments.length == round) {
             commitments.push();
         }
         RoundModelCommitments storage commitment = commitments[round];
+        require(commitment.data[msg.sender].weightCommitment.length == 0,"cannot upload weightCommitment multiple times");
         commitment.data[msg.sender].weightCommitment = weightCommitment;
+        emit CommitmentUploaded(taskId,round,msg.sender,"WEIGHT",weightCommitment);
     }
     
     /**
@@ -277,13 +282,17 @@ contract DeltaContract {
      * @param seedCmmtmnt secret sharing piece of seed mask
      */
     function uploadSeedCommitment(bytes32 taskId,uint64 round,bytes calldata seedCmmtmnt) roundExists(taskId,round) public {
-        require(seedCmmtmnt.length <= maxSSComitmentLength,"commitment length exceeds limit");
+        require(seedCmmtmnt.length > 0 && seedCmmtmnt.length <= maxSSComitmentLength,"commitment length exceeds limit or it is empty");
+        TaskRound storage curRound = taskRounds[taskId][round];
+        require(curRound.status == RoundStatus.AggregatUploading,"seed commitment uploading hasn't started");
         RoundModelCommitments[] storage commitments = roundModelCommitments[taskId];
         if(commitments.length == round) {
             commitments.push();
         }
         RoundModelCommitments storage commitment = commitments[round];
+        require(commitment.data[msg.sender].seedCmmtmnt.length == 0,"cannot upload seedCmmtmnt multiple times");
         commitment.data[msg.sender].seedCmmtmnt = seedCmmtmnt;
+        emit CommitmentUploaded(taskId,round,msg.sender,"SEED",seedCmmtmnt);
     }
     
     function setMaxWeightCommitmentLength(uint64 maxLength) isOwner public {
@@ -306,13 +315,17 @@ contract DeltaContract {
      * @param secretKeyMaskCmmtmnt secret sharing piece of secret key mask
      */
     function uploadSkMaskCommitment(bytes32 taskId,uint64 round,bytes calldata secretKeyMaskCmmtmnt) roundExists(taskId,round) public {
-        require(secretKeyMaskCmmtmnt.length <= maxSSComitmentLength,"commitment length exceeds limit");
+        require(secretKeyMaskCmmtmnt.length > 0 && secretKeyMaskCmmtmnt.length <= maxSSComitmentLength,"commitment length exceeds limit or it is empty");
+        TaskRound storage curRound = taskRounds[taskId][round];
+        require(curRound.status == RoundStatus.AggregatUploading,"sk mask commitment uploading hasn't started");
         RoundModelCommitments[] storage commitments = roundModelCommitments[taskId];
         if(commitments.length == round) {
             commitments.push();
         }
         RoundModelCommitments storage commitment = commitments[round];
+        require(commitment.data[msg.sender].secretKeyMaskCmmtmnt.length == 0,"cannot upload seedCmmtmnt multiple times");
         commitment.data[msg.sender].secretKeyMaskCmmtmnt = secretKeyMaskCmmtmnt;
+        emit CommitmentUploaded(taskId,round,msg.sender,"SKMASK",secretKeyMaskCmmtmnt);
     }
     
     

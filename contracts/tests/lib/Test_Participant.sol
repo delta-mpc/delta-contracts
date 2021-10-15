@@ -9,8 +9,8 @@ contract Participant {
     function createTask(string calldata dataSet ,bytes32 tskCmmtmnt) payable public returns(bytes32 taskId){
         taskId = theContract.createTask(dataSet,tskCmmtmnt);
     }
-    function startRound(bytes32 taskId,uint64 round,uint32 maxSample,uint32 minSample,uint32 joinTimeout,uint32 computTimeout) public {
-        theContract.startRound(taskId,round,maxSample,minSample,joinTimeout,computTimeout);
+    function startRound(bytes32 taskId,uint64 round,uint32 maxSample,uint32 minSample) public {
+        theContract.startRound(taskId,round,maxSample,minSample);
     }
     function joinRound(bytes32 taskId,uint64 round,bytes32 pk1,bytes32 pk2) public returns(bool){
         return theContract.joinRound(taskId,round,pk1,pk2);
@@ -21,9 +21,14 @@ contract Participant {
     function selectCandidates(bytes32 taskId,uint64 round,address[] calldata cltaddrs) public {
         theContract.selectCandidates(taskId,round,cltaddrs);
     }
-    function startAggregate(bytes32 taskId,uint64 round,address[] calldata onlineClients) public {
-        theContract.startAggregate(taskId,round,onlineClients);
+    function startAggregateUpload(bytes32 taskId,uint64 round,address[] calldata onlineClients) public {
+        theContract.startAggregateUpload(taskId,round,onlineClients);
     }
+    
+    function startAggregate(bytes32 taskId,uint64 round) public {
+        theContract.startAggregate(taskId,round);
+    }
+    
     function uploadWeightCommitment(bytes32 taskId,uint64 round,bytes calldata weightCommitment) public {
         theContract.uploadWeightCommitment(taskId,round,weightCommitment);
     }
