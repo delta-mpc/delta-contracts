@@ -7,13 +7,13 @@ contract Participant {
         theContract =  ct;
     }
     function createTask(string calldata dataSet ,bytes32 tskCmmtmnt) payable public returns(bytes32 taskId){
-        taskId = theContract.createTask(dataSet,tskCmmtmnt);
+        taskId = theContract.createTask("dummyUrl",dataSet,tskCmmtmnt);
     }
     function startRound(bytes32 taskId,uint64 round,uint32 maxSample,uint32 minSample) public {
         theContract.startRound(taskId,round,maxSample,minSample);
     }
-    function joinRound(bytes32 taskId,uint64 round,bytes32 pk1,bytes32 pk2) public returns(bool){
-        return theContract.joinRound(taskId,round,pk1,pk2);
+    function joinRound(bytes32 taskId,uint64 round,string calldata url,bytes32 pk1,bytes32 pk2) public returns(bool){
+        return theContract.joinRound(taskId,round,url,pk1,pk2);
     }
     function nop() public returns(bool){
         return true;

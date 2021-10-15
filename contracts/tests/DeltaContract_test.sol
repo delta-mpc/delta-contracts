@@ -56,7 +56,7 @@ contract DeltaContractTest {
     function joinRoundTests() public {
         bytes32 t_id = taskDeveloper.createTask("myDataSet",0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
         taskDeveloper.startRound(t_id,1,3000,300);
-        try clientA.joinRound(0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e00,1,
+        try clientA.joinRound(0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e00,1,"1",
                               0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e00,
                               0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02)
         {
@@ -65,6 +65,7 @@ contract DeltaContractTest {
             Assert.equal(error,"Task not exists","joinRoundTests failed");
         }
         try clientA.joinRound(t_id,0,
+                              "1",    
                               0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e00,
                               0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02)
         {
@@ -72,8 +73,16 @@ contract DeltaContractTest {
         } catch Error (string memory error) {
             Assert.equal(error,"this round has finished or it hasn't been started yet.","joinRoundTests failed");
         }
-        clientA.joinRound(t_id,1,0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e00,0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
-        try clientA.joinRound(t_id,1,0xe83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e00,0xe83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02) {
+        try clientA.joinRound(t_id,1,
+                              "",    
+                              0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e00,
+                              0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02) {
+            Assert.ok(false,"should throw exception");                     
+        } catch Error (string memory error) {
+            Assert.equal(error,"Must provide url","joinRoundTests failed");
+        }
+        clientA.joinRound(t_id,1,"1",0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e00,0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
+        try clientA.joinRound(t_id,1,"1",0xe83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e00,0xe83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02) {
             Assert.ok(false,"should throw exception");
         } catch Error (string memory error) {
             Assert.equal(error,"Cannot join the same round multiple times","joinRoundTests failed");
@@ -81,7 +90,7 @@ contract DeltaContractTest {
         address[] memory lst = new address[](1);
         lst[0] = address(clientA);
         taskDeveloper.selectCandidates(t_id,1,lst);
-        try clientB.joinRound(t_id,1,0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e00,0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02) {
+        try clientB.joinRound(t_id,1,"1",0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e00,0xd83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02) {
             Assert.ok(false,"should throw exception");
         } catch Error (string memory error) {
             Assert.equal(error,"join phase has passed","joinRoundTests failed");
@@ -93,8 +102,8 @@ contract DeltaContractTest {
     function selectCandidatesTests() public {
         bytes32 t_id = taskDeveloper.createTask("myDataSet",0xa83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
         taskDeveloper.startRound(t_id,1,3000,300);
-        clientA.joinRound(t_id,1,0xe83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e01,0xe83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
-        clientB.joinRound(t_id,1,0xf83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e08,0xf83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e09);
+        clientA.joinRound(t_id,1,"1",0xe83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e01,0xe83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
+        clientB.joinRound(t_id,1,"1",0xf83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e08,0xf83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e09);
         address[] memory lst = new address[](2);
         lst[0] = address(clientA);
         lst[1] = address(clientB);
@@ -120,7 +129,7 @@ contract DeltaContractTest {
     function startAggregateUploadTests() public {
         bytes32 t_id = taskDeveloper.createTask("myDataSet",0xa83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e09);
         taskDeveloper.startRound(t_id,1,3000,300);
-        clientA.joinRound(t_id,1,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e01,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
+        clientA.joinRound(t_id,1,"1",0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e01,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
         address[] memory lst = new address[](1);
         lst[0] = address(clientA);
         try taskDeveloper.startAggregateUpload(t_id,1,lst) {
@@ -141,7 +150,7 @@ contract DeltaContractTest {
     function uploadWeightCommitmentTests() public {
         bytes32 t_id = taskDeveloper.createTask("myDataSet",0x683da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e09);
         taskDeveloper.startRound(t_id,1,3000,300);
-        clientA.joinRound(t_id,1,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e01,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
+        clientA.joinRound(t_id,1,"1",0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e01,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
         address[] memory lst = new address[](1);
         lst[0] = address(clientA);
         bytes memory theBytes = new bytes(1);
@@ -185,7 +194,7 @@ contract DeltaContractTest {
     function uploadSeedCommitmentTests() public {
         bytes32 t_id = taskDeveloper.createTask("myDataSet",0x183da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e09);
         taskDeveloper.startRound(t_id,1,3000,300);
-        clientA.joinRound(t_id,1,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e01,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
+        clientA.joinRound(t_id,1,"1",0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e01,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
         address[] memory lst = new address[](1);
         lst[0] = address(clientA);
         taskDeveloper.selectCandidates(t_id,1,lst);
@@ -248,7 +257,7 @@ contract DeltaContractTest {
     function uploadSkMaskCommitmentTests() public {
         bytes32 t_id = taskDeveloper.createTask("myDataSet",0x183da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e09);
         taskDeveloper.startRound(t_id,1,3000,300);
-        clientA.joinRound(t_id,1,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e01,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
+        clientA.joinRound(t_id,1,"1",0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e01,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
         address[] memory lst = new address[](1);
         lst[0] = address(clientA);
         taskDeveloper.selectCandidates(t_id,1,lst);
@@ -296,7 +305,7 @@ contract DeltaContractTest {
     function startAggregateTest() public {
         bytes32 t_id = taskDeveloper.createTask("myDataSet",0x183da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e09);
         taskDeveloper.startRound(t_id,1,3000,300);
-        clientA.joinRound(t_id,1,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e01,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
+        clientA.joinRound(t_id,1,"1",0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e01,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
         address[] memory lst = new address[](1);
         lst[0] = address(clientA);
         taskDeveloper.selectCandidates(t_id,1,lst);

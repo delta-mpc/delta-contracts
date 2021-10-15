@@ -15,16 +15,18 @@ contract DeltaContract {
     mapping(bytes32 => RoundModelCommitments[]) roundModelCommitments;
     uint64 private maxWeightCommitmentLength = 10485760;
     uint64 private maxSSComitmentLength = 256;
-    struct RoundModelCommitments{
+    struct RoundModelCommitments {
         mapping(address=>CommitmentData) data;
     }
     struct Task {
         address creator;
+        string creatorUrl;
         string dataSet;
         bytes32 commitment;
         uint64 currentRound;
     }
     struct Candidate {
+        string url;
         bytes32 pk1;
         bytes32 pk2;
     }
@@ -124,9 +126,9 @@ contract DeltaContract {
       * @param commitment training code hash (client validation purpose)
       * @return taskId taskId
       */
-    function createTask(string calldata dataSet ,bytes32 commitment) payable public returns(bytes32 taskId){
+    function createTask(string calldata creatorUrl,string calldata dataSet ,bytes32 commitment) payable public returns(bytes32 taskId){
          bytes32 task_id = keccak256(abi.encode(block.timestamp,msg.sender,dataSet,commitment));
-         createdTasks[task_id] = Task({creator:msg.sender,dataSet:dataSet,commitment:commitment,currentRound:0});
+         createdTasks[task_id] = Task({creatorUrl:creatorUrl,creator:msg.sender,dataSet:dataSet,commitment:commitment,currentRound:0});
          taskId = task_id;
          TaskRound[] storage rounds = taskRounds[taskId];
          rounds.push();
@@ -160,12 +162,13 @@ contract DeltaContract {
       * @param pk1 used for secure communication channel establishment
       * @param pk2 used for mask generation
       */
-    function joinRound(bytes32 taskId,uint64 round,bytes32 pk1,bytes32 pk2) taskExists(taskId) roundExists(taskId,round) public returns(bool){
+    function joinRound(bytes32 taskId,uint64 round,string calldata url,bytes32 pk1,bytes32 pk2) taskExists(taskId) roundExists(taskId,round) public returns(bool){
         TaskRound[] storage rounds = taskRounds[taskId];
         TaskRound storage thisRound = rounds[rounds.length - 1];
+        require(bytes(url).length > 0,"Must provide url");
         require(thisRound.status == RoundStatus.Started,"join phase has passed");
         require(thisRound.candidates[msg.sender].pk1 == 0x0,"Cannot join the same round multiple times");
-        thisRound.candidates[msg.sender] = Candidate({pk1:pk1,pk2:pk2});
+        thisRound.candidates[msg.sender] = Candidate({url:url,pk1:pk1,pk2:pk2});
         thisRound.joinedAddrs.push(msg.sender);
         return true;
     }
