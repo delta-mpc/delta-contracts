@@ -250,7 +250,7 @@ contract DeltaContract {
      * @param taskId taskId
      * @param round the task round
      */
-    function startRound(bytes32 taskId,uint64 round) taskOwner(taskId) roundExists(taskId,round) public {
+    function endRound(bytes32 taskId,uint64 round) taskOwner(taskId) roundExists(taskId,round) public {
         TaskRound storage curRound = taskRounds[taskId][round];
         curRound.status = RoundStatus.Finished;
     }
