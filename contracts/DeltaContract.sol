@@ -55,7 +55,7 @@ contract DeltaContract {
     // event for EVM logging
     event OwnerSet(address indexed oldOwner, address indexed newOwner);
     // triggered when task created 
-    event TaskCreated(address indexed creator,bytes32 taskId,string dataSet,bytes32 taskCommitment);
+    event TaskCreated(address indexed creator,bytes32 taskId,string dataSet,string creatorUrl,bytes32 taskCommitment);
     // triggered when task developer call startRound
     event RoundStart(bytes32 taskId,uint64 round);
     // triggered when task developer call selectCandidates
@@ -132,7 +132,7 @@ contract DeltaContract {
          taskId = task_id;
          TaskRound[] storage rounds = taskRounds[taskId];
          rounds.push();
-         emit TaskCreated(msg.sender,task_id,dataSet,commitment);
+         emit TaskCreated(msg.sender,task_id,dataSet,creatorUrl,commitment);
     }
     
     /**
