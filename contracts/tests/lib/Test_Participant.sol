@@ -33,11 +33,19 @@ contract Participant {
     function uploadWeightCommitment(bytes32 taskId,uint64 round,bytes calldata weightCommitment) public {
         theContract.uploadWeightCommitment(taskId,round,weightCommitment);
     }
-    function uploadSSeed(bytes32 taskId,uint64 round,address sharee,bytes calldata sseed,bytes calldata seedCmmtmnt) public {
-        theContract.uploadSSeed(taskId,round,sharee,sseed,seedCmmtmnt);
+    
+    function uploadSSeedCmmt(bytes32 taskId,uint64 round,address sharee,bytes calldata sseedcmmt) public {
+        theContract.uploadSSeedCmmt(taskId,round,sharee,sseedcmmt);
     }
-    function uploadSkMask(bytes32 taskId,uint64 round,address sharee,bytes calldata skmask,bytes calldata skCmmtmnt)  public {
-        theContract.uploadSkMask(taskId,round,sharee,skmask,skCmmtmnt);
+    function uploadSkMaskCmmt(bytes32 taskId,uint64 round,address sharee,bytes calldata skmaskcmmt)  public {
+        theContract.uploadSkMaskCmmt(taskId,round,sharee,skmaskcmmt);
+    }
+    
+    function uploadSSeed(bytes32 taskId,uint64 round,address sharee,bytes calldata sseed) public {
+        theContract.uploadSSeed(taskId,round,sharee,sseed);
+    }
+    function uploadSkMask(bytes32 taskId,uint64 round,address sharee,bytes calldata skmask)  public {
+        theContract.uploadSkMask(taskId,round,sharee,skmask);
     }
     
     function setMaxWeightCommitmentLength(uint64 maxLength) public {
