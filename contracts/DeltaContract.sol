@@ -251,7 +251,7 @@ contract DeltaContract {
     function startAggregate(bytes32 taskId,uint64 round,address[] calldata onlineClients) taskOwner(taskId) roundExists(taskId,round) public {
         TaskRound storage curRound = taskRounds[taskId][round];
         require(curRound.status == RoundStatus.Calculating,"Calculating has not started");
-        curRound.status = RoundStatus.Calculating;
+        curRound.status = RoundStatus.Aggregating;
         for(uint i = 0; i < onlineClients.length; i ++) {
             require(curRound.candidates[onlineClients[i]].pk1 != 0x00,"Candidate must exist");
         }
@@ -267,7 +267,7 @@ contract DeltaContract {
     function startCalculate(bytes32 taskId,uint64 round) taskOwner(taskId) roundExists(taskId,round) public {
         TaskRound storage curRound = taskRounds[taskId][round];
         require(curRound.status == RoundStatus.Running,"This round is not running now");
-        curRound.status = RoundStatus.Aggregating;
+        curRound.status = RoundStatus.Calculating;
         emit CalculateStarted(taskId,round);
     }
     
@@ -290,16 +290,33 @@ contract DeltaContract {
     function uploadWeightCommitment(bytes32 taskId,uint64 round,bytes calldata weightCommitment) roundExists(taskId,round) public {
         require(weightCommitment.length > 0 && weightCommitment.length <= maxWeightCommitmentLength,"commitment length exceeds limit or it is empty");
         TaskRound storage curRound = taskRounds[taskId][round];
-        require(curRound.status == RoundStatus.Aggregating ,"not in uploading phase");
+        require(curRound.status == RoundStatus.Calculating ,"not in uploading phase");
         RoundModelCommitments[] storage commitments = roundModelCommitments[taskId];
-        if(commitments.length == round) {
-            commitments.push();
-        }
         RoundModelCommitments storage commitment = commitments[round];
         require(commitment.weightCommitment[msg.sender].length == 0,"cannot upload weightCommitment multiple times");
         commitment.weightCommitment[msg.sender] = weightCommitment;
         emit ContentUploaded(taskId,round,msg.sender,address(0),"WEIGHT",weightCommitment);
     }
+    
+    
+    /**
+     * @dev called by client, upload secret sharing seed commitment
+     * @param taskId taskId
+     * @param round the task round
+     * @param sharee the sharee address
+     * @param seedCmmtmnt secret sharing piece of seed mask
+     */
+    function uploadSSeedCmmt(bytes32 taskId,uint64 round,address sharee,bytes calldata seedCmmtmnt) roundExists(taskId,round) public {
+        require(seedCmmtmnt.length > 0 && seedCmmtmnt.length <= maxSSComitmentLength,"commitment length exceeds limit or it is empty");
+        TaskRound storage curRound = taskRounds[taskId][round];
+        require(curRound.status == RoundStatus.Running,"not in secret sharing phase");
+        RoundModelCommitments[] storage commitments = roundModelCommitments[taskId];
+        RoundModelCommitments storage commitment = commitments[round];
+        require(commitment.ssdata[msg.sender][sharee].ssSeedCmmtmnt.length == 0,"cannot upload seed cmmt multiple times");
+        commitment.ssdata[msg.sender][sharee].ssSeedCmmtmnt = seedCmmtmnt;
+        emit ContentUploaded(taskId,round,msg.sender,sharee,"SEEDCMMT",seedCmmtmnt);
+    }
+    
     
     /**
      * @dev called by client, upload secret sharing seed commitment
@@ -307,19 +324,39 @@ contract DeltaContract {
      * @param round the task round
      * @param sharee the sharee address
      * @param sseed the crypted seed
-     * @param seedCmmtmnt secret sharing piece of seed mask
      */
-    function uploadSSeed(bytes32 taskId,uint64 round,address sharee,bytes calldata sseed,bytes calldata seedCmmtmnt) roundExists(taskId,round) public {
-        require(sseed.length > 0 && sseed.length <= maxSSComitmentLength && seedCmmtmnt.length > 0 && seedCmmtmnt.length <= maxSSComitmentLength,"commitment length exceeds limit or it is empty");
+    function uploadSSeed(bytes32 taskId,uint64 round,address sharee,bytes calldata sseed) roundExists(taskId,round) public {
+        require(sseed.length > 0 && sseed.length <= maxSSComitmentLength ,"commitment length exceeds limit or it is empty");
+        TaskRound storage curRound = taskRounds[taskId][round];
+        require(curRound.status == RoundStatus.Aggregating,"not in upload ss phase");
+        RoundModelCommitments[] storage commitments = roundModelCommitments[taskId];
+        RoundModelCommitments storage commitment = commitments[round];
+        require(commitment.ssdata[msg.sender][sharee].ssSeedCmmtmnt.length > 0,"must upload commitment first");
+        require(commitment.ssdata[msg.sender][sharee].ssSeed.length == 0,"cannot upload seed multiple times");
+        commitment.ssdata[msg.sender][sharee].ssSeed = sseed;
+        emit ContentUploaded(taskId,round,msg.sender,sharee,"SEED",sseed);
+    }
+    
+    /**
+     * @dev called by client, upload secret sharing sk commitment
+     * @param taskId taskId
+     * @param round the task round
+     * @param sharee the sharee address
+     * @param skCmmtmnt secret sharing piece of seed mask
+     */
+    function uploadSkMaskCmmt(bytes32 taskId,uint64 round,address sharee,bytes calldata skCmmtmnt) roundExists(taskId,round) public {
+        require(skCmmtmnt.length > 0 && skCmmtmnt.length <= maxSSComitmentLength,"commitment length exceeds limit or it is empty");
         TaskRound storage curRound = taskRounds[taskId][round];
         require(curRound.status == RoundStatus.Running,"not in secret sharing phase");
         RoundModelCommitments[] storage commitments = roundModelCommitments[taskId];
+        if(commitments.length == round) {
+            commitments.push();
+        }
         RoundModelCommitments storage commitment = commitments[round];
-        require(commitment.ssdata[msg.sender][sharee].ssSeed.length == 0,"cannot upload seed multiple times");
-        commitment.ssdata[msg.sender][sharee].ssSeed = sseed;
-        commitment.ssdata[msg.sender][sharee].ssSeedCmmtmnt = seedCmmtmnt;
-        emit ContentUploaded(taskId,round,msg.sender,sharee,"SEED",sseed);
-        emit ContentUploaded(taskId,round,msg.sender,sharee,"SEEDCMMT",seedCmmtmnt);
+        require(commitment.ssdata[msg.sender][sharee].ssSecretKeyMaskCmmtmnt.length == 0,"cannot upload seed multiple times");
+        commitment.ssdata[msg.sender][sharee].ssSecretKeyMaskCmmtmnt = skCmmtmnt;
+        emit ContentUploaded(taskId,round,msg.sender,sharee,"SKMASKCMMT",skCmmtmnt);
+        // commitment.data[msg.sender].seedCmmtmnt = seedCmmtmnt;
     }
     
     
@@ -329,22 +366,20 @@ contract DeltaContract {
      * @param round the task round
      * @param skmask the crypted skmask
      * @param sharee the sharee address
-     * @param skCmmtmnt secret sharing piece of seed mask
      */
-    function uploadSkMask(bytes32 taskId,uint64 round,address sharee,bytes calldata skmask,bytes calldata skCmmtmnt) roundExists(taskId,round) public {
-        require(skmask.length > 0 && skmask.length <= maxSSComitmentLength && skCmmtmnt.length > 0 && skCmmtmnt.length <= maxSSComitmentLength,"commitment length exceeds limit or it is empty");
+    function uploadSkMask(bytes32 taskId,uint64 round,address sharee,bytes calldata skmask) roundExists(taskId,round) public {
+        require(skmask.length > 0 && skmask.length <= maxSSComitmentLength,"commitment length exceeds limit or it is empty");
         TaskRound storage curRound = taskRounds[taskId][round];
-        require(curRound.status == RoundStatus.Running,"not in secret sharing phase");
+        require(curRound.status == RoundStatus.Aggregating,"not in upload ss phase");
         RoundModelCommitments[] storage commitments = roundModelCommitments[taskId];
         if(commitments.length == round) {
             commitments.push();
         }
         RoundModelCommitments storage commitment = commitments[round];
-        require(commitment.ssdata[msg.sender][sharee].ssSecretKey.length == 0,"cannot upload seed multiple times");
+        require(commitment.ssdata[msg.sender][sharee].ssSecretKeyMaskCmmtmnt.length > 0,"must upload commitment first");
+        require(commitment.ssdata[msg.sender][sharee].ssSecretKey.length == 0,"cannot upload skmask multiple times");
         commitment.ssdata[msg.sender][sharee].ssSecretKey = skmask;
-        commitment.ssdata[msg.sender][sharee].ssSecretKeyMaskCmmtmnt = skCmmtmnt;
         emit ContentUploaded(taskId,round,msg.sender,sharee,"SKMASK",skmask);
-        emit ContentUploaded(taskId,round,msg.sender,sharee,"SKMASKCMMT",skCmmtmnt);
         // commitment.data[msg.sender].seedCmmtmnt = seedCmmtmnt;
     }
     
