@@ -94,28 +94,9 @@ params:
 
 no returns
 
-### getSeedPiece
+### getSecretSharingData
 
-聚合阶段，获取在线客户端的随机种子的秘密分享片段
-
-params:
-
-| name | type | description |
-| --- | --- | --- |
-| taskID | bytes32 | 任务ID |
-| round | uint64 | 开始的轮次 |
-| owner | address | 随机种子的拥有者 |
-| sharer | address | 秘密分享的目标 |
-
-returns:
-
-| name | type | description |
-| --- | --- | --- |
-| piece | bytes | 随机种子的秘密分享片段 |
-
-### getSeedCommitment
-
-聚合阶段，获取在线客户端的随机种子的秘密分享片段的哈希
+聚合阶段，获取在线客户端的随机种子的秘密分享片段及哈希
 
 params:
 
@@ -124,53 +105,16 @@ params:
 | taskID | bytes32 | 任务ID |
 | round | uint64 | 开始的轮次 |
 | owner | address | 随机种子的拥有者 |
-| sharer | address | 秘密分享的目标 |
+| sharee | address | 秘密分享的目标 |
 
 returns:
 
 | name | type | description |
 | --- | --- | --- |
-| commitment | bytes | 随机种子的秘密分享片段的哈希 |
-
-### getSKPiece
-
-聚合阶段，获取离线客户端的SK2的秘密分享片段
-
-params:
-
-| name | type | description |
-| --- | --- | --- |
-| taskID | bytes32 | 任务ID |
-| round | uint64 | 开始的轮次 |
-| owner | address | SK2的拥有者 |
-| sharer | address | 秘密分享的目标 |
-
-returns:
-
-| name | type | description |
-| --- | --- | --- |
-| piece | bytes | SK2的秘密分享片段 |
-
-### getSKCommitment
-
-聚合阶段，获取离线客户端的SK2的秘密分享片段的哈希
-
-params:
-
-| name | type | description |
-| --- | --- | --- |
-| taskID | bytes32 | 任务ID |
-| round | uint64 | 开始的轮次 |
-| owner | address | 随机种子的拥有者 |
-| sharer | address | 秘密分享的目标 |
-
-returns:
-
-| name | type | description |
-| --- | --- | --- |
-| commitment | bytes | SK2的秘密分享片段的哈希 |
-
-
+| ssSeed | bytes | 随机种子的秘密分享片段 |
+| ssSeedCmmtmnt | bytes | 随机种子的秘密分享片段哈希 |
+| ssSecretKey | bytes | SK2的秘密分享片段 |
+| ssSecretKeyMaskCmmtmnt | bytes | SK2的秘密分享片段哈希 |
 
 ## 客户端调用
 
@@ -225,7 +169,7 @@ params:
 | round | uint64 | 轮次 |
 | owner | address| 随机种子的拥有者 |
 | sharer | address | 秘密分享的目标 |
-| commitment | bytes | 随机种子的哈希 |
+| seedCommitment | bytes | 随机种子的哈希 |
 
 no returns
 
@@ -241,7 +185,7 @@ params:
 | round | uint64 | 轮次 |
 | owner | address| 随机种子的拥有者 |
 | sharer | address | 秘密分享的目标 |
-| commitment | bytes | SK2的哈希 |
+| skCommitment | bytes | SK2的哈希 |
 
 no returns
 
@@ -259,7 +203,7 @@ params:
 
 no returns
 
-### uploadSeedPiece
+### uploadSSeed
 
 聚合阶段，上传在线客户端的加密Mask的随机种子的秘密分享片段
 
@@ -270,11 +214,11 @@ params:
 | taskID | bytes32 | 任务ID |
 | round | uint64 | 轮次 |
 | owner | address | 随机种子的拥有者（在线的客户端） |
-| piece | bytes | 随机种子的秘密分享片段 |
+| sseed | bytes | 随机种子的秘密分享片段 |
 
 no returns
 
-### uploadSKPiece
+### uploadSkMask
 
 聚合阶段，上传离线客户端的SK2的秘密分享片段
 
@@ -285,7 +229,7 @@ params:
 | taskID | bytes32 | 任务ID |
 | round | uint64 | 轮次 |
 | owner | address | SK2的拥有者（离线的客户端） |
-| piece | bytes | SK2的秘密分享片段 |
+| skmask | bytes | SK2的秘密分享片段 |
 
 
 no returns
