@@ -30,35 +30,35 @@ contract DeltaContractTest {
         seed[0] = 0x01;
         bytes memory seedCmmt = new bytes(1);
         seedCmmt[0] = 0x02;
-        try clientA.uploadSSeedCmmt(t_id,1,address(clientB),seedCmmt) {
+        try clientA.uploadSeedCommitment(t_id,1,address(clientB),seedCmmt) {
             Assert.ok(false,"should throw exception1");
         } catch Error(string memory error) {
             Assert.equal(error,"not in secret sharing phase","uploadSeedCommitmentTests failed");
         }
         taskDeveloper.selectCandidates(t_id,1,lst);
         dContract.setMaxSSCommitmentLength(256);
-        clientA.uploadSSeedCmmt(t_id,1,address(clientB),seedCmmt);
-        try clientA.uploadSSeedCmmt(t_id,1,address(clientB),seedCmmt) {
+        clientA.uploadSeedCommitment(t_id,1,address(clientB),seedCmmt);
+        try clientA.uploadSeedCommitment(t_id,1,address(clientB),seedCmmt) {
             Assert.ok(false,"should throw exception2");
         } catch Error(string memory error) {
             Assert.equal(error,"cannot upload seed cmmt multiple times","uploadSeedCommitmentTests failed");
         }
         bytes memory seedCmmt2 = new bytes(257);
         seedCmmt2[256] = 0x01;
-        try clientB.uploadSSeedCmmt(t_id,1,address(clientA),seedCmmt2) {
+        try clientB.uploadSeedCommitment(t_id,1,address(clientA),seedCmmt2) {
             Assert.ok(false,"should throw exception3");
         }catch Error(string memory error) {
             Assert.equal(error,"commitment length exceeds limit or it is empty","uploadSeedCommitmentTests failed");
         }
         taskDeveloper.startCalculate(t_id,1);
-        try clientB.uploadSSeedCmmt(t_id,1,address(clientA),seedCmmt) {
+        try clientB.uploadSeedCommitment(t_id,1,address(clientA),seedCmmt) {
             Assert.ok(false,"should throw exception4");
         } catch Error(string memory error) {
             Assert.equal(error,"not in secret sharing phase","uploadSeedCommitmentTests failed");
         }
        
-        DeltaContract.SSData memory ssdata =  taskDeveloper.getSSData(t_id,1,address(clientA),address(clientB));
-        bytes memory seedCmtData = ssdata.ssSeedCmmtmnt;
+        DeltaContract.SSData memory ssdata =  taskDeveloper.getSecretSharingData(t_id,1,address(clientA),address(clientB));
+        bytes memory seedCmtData = ssdata.seedCommitment;
         uint8 v1;
         assembly {
             v1 := byte(0,mload(add(seedCmtData,32)))
@@ -77,34 +77,34 @@ contract DeltaContractTest {
         seed[0] = 0x01;
         bytes memory seedCmmt = new bytes(1);
         seedCmmt[0] = 0x02;
-        try clientA.uploadSkMaskCmmt(t_id,1,address(clientB),seedCmmt) {
+        try clientA.uploadSKCommitment(t_id,1,address(clientB),seedCmmt) {
             Assert.ok(false,"should throw exception1");
         } catch Error(string memory error) {
             Assert.equal(error,"not in secret sharing phase","uploadSkMaskCommitmentTests failed");
         }
         taskDeveloper.selectCandidates(t_id,1,lst);
         dContract.setMaxSSCommitmentLength(256);
-        clientA.uploadSkMaskCmmt(t_id,1,address(clientB),seedCmmt);
-        try clientA.uploadSkMaskCmmt(t_id,1,address(clientB),seedCmmt) {
+        clientA.uploadSKCommitment(t_id,1,address(clientB),seedCmmt);
+        try clientA.uploadSKCommitment(t_id,1,address(clientB),seedCmmt) {
             Assert.ok(false,"should throw exception2");
         } catch Error(string memory error) {
             Assert.equal(error,"cannot upload seed multiple times","uploadSkMaskCommitmentTests failed");
         }
         bytes memory seed2 = new bytes(257);
         seed2[256] = 0x01;
-        try clientB.uploadSkMaskCmmt(t_id,1,address(clientA),seed2) {
+        try clientB.uploadSKCommitment(t_id,1,address(clientA),seed2) {
             Assert.ok(false,"should throw exception3");
         }catch Error(string memory error) {
             Assert.equal(error,"commitment length exceeds limit or it is empty","uploadSkMaskCommitmentTests failed");
         }
         taskDeveloper.startCalculate(t_id,1);
-        try clientB.uploadSkMaskCmmt(t_id,1,address(clientA),seedCmmt) {
+        try clientB.uploadSKCommitment(t_id,1,address(clientA),seedCmmt) {
             Assert.ok(false,"should throw exception4");
         } catch Error(string memory error) {
             Assert.equal(error,"not in secret sharing phase","uploadSkMaskCommitmentTests failed");
         }
-        DeltaContract.SSData memory ssdata =  taskDeveloper.getSSData(t_id,1,address(clientA),address(clientB));
-        bytes memory skMaskCmtData = ssdata.ssSecretKeyMaskCmmtmnt;
+        DeltaContract.SSData memory ssdata =  taskDeveloper.getSecretSharingData(t_id,1,address(clientA),address(clientB));
+        bytes memory skMaskCmtData = ssdata.secretKeyMaskCommitment;
         uint8 v1;
         assembly {
             v1 := byte(0,mload(add(skMaskCmtData,32)))
@@ -132,7 +132,7 @@ contract DeltaContractTest {
         lst[0] = address(clientA);
         bytes memory theBytes = new bytes(1);
         theBytes[0] = 0x01;
-        try clientA.uploadWeightCommitment(t_id,1,theBytes) {
+        try clientA.uploadResultCommitment(t_id,1,theBytes) {
             Assert.ok(false,"should throw exception");
         } catch Error(string memory error) {
             Assert.equal(error,"not in uploading phase","uploadWeightCommitmentTests failed");
@@ -142,23 +142,23 @@ contract DeltaContractTest {
         seed[0] = 0x01;
         bytes memory seedCmmt = new bytes(1);
         seedCmmt[0] = 0x02;
-        clientA.uploadSkMaskCmmt(t_id,1,address(clientB),seedCmmt);
-        clientA.uploadSSeedCmmt(t_id,1,address(clientB),seedCmmt);
+        clientA.uploadSKCommitment(t_id,1,address(clientB),seedCmmt);
+        clientA.uploadSeedCommitment(t_id,1,address(clientB),seedCmmt);
         dContract.setMaxWeightCommitmentLength(10);
         bytes memory exceedslimit = new bytes(11);
         taskDeveloper.startCalculate(t_id,1);
-        try clientA.uploadWeightCommitment(t_id,1,exceedslimit) {
+        try clientA.uploadResultCommitment(t_id,1,exceedslimit) {
             Assert.ok(false,"should throw exception");
         } catch Error(string memory error) {
             Assert.equal(error,"commitment length exceeds limit or it is empty","uploadWeightCommitmentTests failed");
         }
-        clientA.uploadWeightCommitment(t_id,1,theBytes);
-        try clientA.uploadWeightCommitment(t_id,1,theBytes) {
+        clientA.uploadResultCommitment(t_id,1,theBytes);
+        try clientA.uploadResultCommitment(t_id,1,theBytes) {
             Assert.ok(false,"should throw exception");
         } catch Error(string memory error) {
             Assert.equal(error,"cannot upload weightCommitment multiple times","uploadWeightCommitmentTests failed");
         }
-        bytes memory cmmt =  taskDeveloper.getWeightCommitment(t_id,address(clientA),1);
+        bytes memory cmmt =  taskDeveloper.getResultCommitment(t_id,address(clientA),1);
         uint8 v;
         assembly {
             v := byte(0,mload(add(cmmt,32)))
@@ -182,32 +182,32 @@ contract DeltaContractTest {
         seedCmmt[0] = 0x02;
         bytes memory skmask = new bytes(1);
         skmask[0] = 0x02;
-        clientA.uploadSkMaskCmmt(t_id,1,address(clientB),seedCmmt);
-        clientA.uploadSSeedCmmt(t_id,1,address(clientB),seedCmmt);
+        clientA.uploadSKCommitment(t_id,1,address(clientB),seedCmmt);
+        clientA.uploadSeedCommitment(t_id,1,address(clientB),seedCmmt);
         Assert.ok(true,'should throw exception1');
         dContract.setMaxWeightCommitmentLength(10);
         bytes memory exceedslimit = new bytes(11);
         taskDeveloper.startCalculate(t_id,1);
-        clientA.uploadWeightCommitment(t_id,1,theBytes);
-        try clientA.uploadSSeed(t_id,1,address(clientB),seed) {
+        clientA.uploadResultCommitment(t_id,1,theBytes);
+        try clientA.uploadSeed(t_id,1,address(clientB),seed) {
             Assert.ok(false,'should throw exception1');
         } catch Error(string memory error) {
             Assert.equal(error,"not in upload ss phase","uploadWeightCommitmentTests failed");
         }
-        try clientA.uploadSkMask(t_id,1,address(clientB),skmask) {
+        try clientA.uploadSecretkeyMask(t_id,1,address(clientB),skmask) {
             Assert.ok(false,'should throw exception2');
         } catch Error(string memory error) {
             Assert.equal(error,"not in upload ss phase","uploadWeightCommitmentTests failed");
         }
         taskDeveloper.startAggregate(t_id,1,lst);
-        clientA.uploadSSeed(t_id,1,address(clientB),seed);
-        try clientA.uploadSSeed(t_id,1,address(clientB),seed) {
+        clientA.uploadSeed(t_id,1,address(clientB),seed);
+        try clientA.uploadSeed(t_id,1,address(clientB),seed) {
             Assert.ok(false,'should throw exception');
         } catch Error(string memory error) {
             Assert.equal(error,"cannot upload seed multiple times","uploadWeightCommitmentTests failed");
         }
-        clientA.uploadSkMask(t_id,1,address(clientB),skmask);
-        try clientA.uploadSkMask(t_id,1,address(clientB),skmask) {
+        clientA.uploadSecretkeyMask(t_id,1,address(clientB),skmask);
+        try clientA.uploadSecretkeyMask(t_id,1,address(clientB),skmask) {
             Assert.ok(false,'should throw exception');
         } catch Error(string memory error) {
             Assert.equal(error,"cannot upload skmask multiple times","uploadWeightCommitmentTests failed");

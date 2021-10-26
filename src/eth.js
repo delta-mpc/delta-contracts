@@ -1,6 +1,5 @@
 import Web3 from "web3";
 import conf from '../config/config.js'
-
 let connected = false;
 let web3 = new Web3();
 
@@ -17,7 +16,9 @@ function Connect() {
                 onTimeout: false
             }
         };
-        let provider = new Web3.providers.WebsocketProvider(conf.web3ProviderURL, options);
+      //   HTTP://127.0.0.1:7545
+      //   conf.web3ProviderURL
+        let provider = new Web3.providers.WebsocketProvider("http://127.0.0.1:7545", options);
         provider.on('error', (e) => {
             console.error(e.reason)
         });

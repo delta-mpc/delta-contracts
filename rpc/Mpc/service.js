@@ -1,4 +1,4 @@
-import {Node} from './node.js'
+import {Node} from '../node.js'
 
 let node;
 

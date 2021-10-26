@@ -1,0 +1,210 @@
+syntax = "proto3";
+
+package deltacontract;
+
+service DeltaContract {
+  rpc createTask(CreateTaskRequest) returns (stream TaskDataResponse) {}
+  rpc getTaskData(GetTaskDataRequest) returns (stream TaskDataResponse) {}
+  rpc startRound(StartRoundRequest) returns (stream RoundResponse) {}
+  rpc joinRound(JoinRoundRequest) returns (stream CommonResponse) {}
+  rpc getTaskRound(TaskRoundQuery) returns (stream TaskRoundResponse) {}
+  rpc getClientPks(GetClientRequest) returns (stream GetClientResponse) {}
+  rpc selectCandidates(CandidatesSelect) returns (stream CandidatesSelectResponse) {}
+  rpc startCalculate(StageStartData) returns (stream StageStartResponse) {}
+  rpc uploadResultCommitment(uploadResultCmmt) returns (stream uploadResponse) {}
+  rpc uploadSeedCommitment(uploadSSSKCmmt) returns (stream uploadResponse) {}
+  rpc getResultCommitment(GetClientRequest) returns (stream GetResultCommitmentResponse) {}
+  rpc getSecretSharingData(GetSSDataRequest) returns (stream GetSSDataResponse) {}
+  rpc uploadSeed(uploadSSSKCmmt) returns (stream uploadResponse) {}
+  rpc uploadSKCommitment(uploadSSSKCmmt) returns (stream uploadResponse) {}
+  rpc uploadSecretkeyMask(uploadSSSKCmmt) returns (stream uploadResponse) {}
+  rpc startAggregate(StageStartData) returns (stream StageStartResponse) {}
+  rpc endRound(RoundData) returns (stream RoundResponse) {}
+}
+
+message GetSSDataRequest {
+   string taskId = 1;
+   uint64 round = 2;
+   string owner = 3;
+   string sharee = 4;
+}
+
+message GetSSDataContent {
+   bytes seedPiece = 1;
+   bytes seedCommitment = 2;
+   bytes secretKeyPiece = 3;
+   bytes secretKeyMaskCommitment = 4;
+}
+
+message GetSSDataResponse {
+   oneof response {
+      string error = 1;
+      GetSSDataContent data = 2;
+   }
+}
+
+message GetResultCommitmentResponse {
+   oneof response {
+      string error = 1;
+      bytes data = 2;
+   }
+}
+
+message uploadSSSKCmmt {
+   string taskId = 1;
+   uint64 round = 2;
+   string sharee = 3;
+   bytes content = 4;
+}
+
+
+message uploadResultCmmt {
+   string taskId = 1;
+   uint64 round = 2;
+   bytes commitment = 3;
+}
+
+message UploadResponseContent {
+   string taskId = 1;
+   uint64 round = 2;
+   string owner = 3;
+   string sharee = 4;
+   string contentType = 5;
+   bytes content=6;
+}
+
+message uploadResponse {
+   oneof response {
+      string error = 1;
+      UploadResponseContent data = 2;
+   }
+}
+
+message StageStartData {
+   string taskId = 1;
+   uint64 round = 2;
+   repeated string addrs = 3;
+}
+
+message StageStartResponse {
+   oneof response {
+      string error = 1;
+      StageStartData data = 2;
+   }
+}
+
+message CandidatesSelect {
+   string taskId = 1;
+   uint64 round = 2;
+   repeated string addrs = 3;
+}
+
+message CandidatesSelectResponse {
+   oneof response {
+      string error = 1;
+      CandidatesSelect data = 2;
+   }
+}
+
+
+message GetClientRequest {
+   string taskId = 1;
+   uint64 round = 2;
+   string address = 3;
+}
+
+message ClientData {
+   string pk1 = 2;
+   string pk2 = 3;
+}
+
+message GetClientResponse {
+   oneof response {
+      string error = 1;
+      ClientData data = 2;
+   }
+}
+
+message CommonData {
+   bytes value = 1;
+}
+
+message CommonResponse {
+   oneof response {
+      string error = 1;
+      CommonData data = 2;
+   }
+}
+
+message TaskRoundQuery {
+   string taskId = 1;
+   uint32 round = 2;
+}
+
+message TaskRound {
+   uint64 currentRound = 1;
+   uint32 maxSample = 2;
+   uint32 minSample = 3;
+   uint64 status = 4;
+   repeated string joinedAddrs = 5;
+}
+
+message TaskRoundResponse {
+   oneof response {
+      string error = 1;
+      TaskRound data = 2;
+   }
+}
+
+message JoinRoundRequest {
+   string taskId = 1;
+   uint64 round = 2;
+   bytes pk1 = 3;
+   bytes pk2 = 4;
+}
+
+message StartRoundRequest {
+   string taskId = 1;
+   uint64 round = 2;
+   uint32 maxSample = 3;
+   uint32 minSample = 4;
+}
+
+message RoundResponse {
+   oneof response {
+      string error = 1;
+      RoundData data = 2;
+   }
+}
+
+message RoundData {
+   string taskId = 1;
+   uint64 round = 2;
+}
+
+message CreateTaskRequest{
+  string creatorUrl = 1;
+  string dataSet = 2;
+  bytes commitment = 3;
+}
+
+message GetTaskDataRequest{
+  string taskId = 1;
+}
+
+message GetTaskData {
+   string creator = 1;
+   optional string taskId = 2;
+   string dataSet = 3;
+   string creatorUrl = 4;
+   bytes commitment = 5;
+   optional uint64 currentRound = 6;
+}
+
+message TaskDataResponse {
+  oneof response{
+     string error = 1;
+     GetTaskData data = 2;
+  }
+}
+

@@ -30,22 +30,22 @@ contract Participant {
         theContract.startCalculate(taskId,round);
     }
     
-    function uploadWeightCommitment(bytes32 taskId,uint64 round,bytes calldata weightCommitment) public {
-        theContract.uploadWeightCommitment(taskId,round,weightCommitment);
+    function uploadResultCommitment(bytes32 taskId,uint64 round,bytes calldata weightCommitment) public {
+        theContract.uploadResultCommitment(taskId,round,weightCommitment);
     }
     
-    function uploadSSeedCmmt(bytes32 taskId,uint64 round,address sharee,bytes calldata sseedcmmt) public {
-        theContract.uploadSSeedCmmt(taskId,round,sharee,sseedcmmt);
+    function uploadSeedCommitment(bytes32 taskId,uint64 round,address sharee,bytes calldata sseedcmmt) public {
+        theContract.uploadSeedCommitment(taskId,round,sharee,sseedcmmt);
     }
-    function uploadSkMaskCmmt(bytes32 taskId,uint64 round,address sharee,bytes calldata skmaskcmmt)  public {
-        theContract.uploadSkMaskCmmt(taskId,round,sharee,skmaskcmmt);
+    function uploadSKCommitment(bytes32 taskId,uint64 round,address sharee,bytes calldata skmaskcmmt)  public {
+        theContract.uploadSKCommitment(taskId,round,sharee,skmaskcmmt);
     }
     
-    function uploadSSeed(bytes32 taskId,uint64 round,address sharee,bytes calldata sseed) public {
-        theContract.uploadSSeed(taskId,round,sharee,sseed);
+    function uploadSeed(bytes32 taskId,uint64 round,address sharee,bytes calldata sseed) public {
+        theContract.uploadSeed(taskId,round,sharee,sseed);
     }
-    function uploadSkMask(bytes32 taskId,uint64 round,address sharee,bytes calldata skmask)  public {
-        theContract.uploadSkMask(taskId,round,sharee,skmask);
+    function uploadSecretkeyMask(bytes32 taskId,uint64 round,address sharee,bytes calldata skmask)  public {
+        theContract.uploadSecretkeyMask(taskId,round,sharee,skmask);
     }
     
     function setMaxWeightCommitmentLength(uint64 maxLength) public {
@@ -56,11 +56,11 @@ contract Participant {
         theContract.setMaxSSCommitmentLength(maxLength);
     }
     
-    function getWeightCommitment(bytes32 taskId,address clientaddress,uint64 round) public view returns(bytes memory commitment) {
-        commitment =  theContract.getWeightCommitment(taskId,clientaddress,round);
+    function getResultCommitment(bytes32 taskId,address clientaddress,uint64 round) public view returns(bytes memory commitment) {
+        commitment =  theContract.getResultCommitment(taskId,clientaddress,round);
     }
     
-    function getSSData(bytes32 taskId,uint64 round,address owner,address sharee) public view returns(DeltaContract.SSData memory ssdata)  {
-        ssdata =  theContract.getSSData(taskId,round,owner,sharee);
+    function getSecretSharingData(bytes32 taskId,uint64 round,address owner,address sharee) public view returns(DeltaContract.SSData memory ssdata)  {
+        ssdata =  theContract.getSecretSharingData(taskId,round,owner,sharee);
     }
 }

@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package deltacontract;
+
+service DeltaContract {
+  rpc createTask(CreateTaskRequest) returns (stream EventResponse) {}
+}
+
+message CreateTaskRequest {
+  string creatorUrl = 1;
+  string dataSet = 2;
+  bytes commitment = 3;
+}

@@ -127,6 +127,7 @@ Contract.prototype = {
     },
     methodData: async function (methodName, args = [], gasConfig = null, nonce = 0) {
         if (this.at()) {
+            console.log(this.contract.methods)
             let method = this.contract.methods[methodName](...args);
             let data = method.encodeABI()
             return await txData(data, this.address, nonce, gasConfig);
@@ -153,6 +154,7 @@ Contract.prototype = {
             }
         } catch (e) {
             console.log('method: ', e)
+            throw e;
         }
 
     },
@@ -179,10 +181,12 @@ Contract.prototype = {
         try {
             if (this.at()) {
                 const method = this.contract.methods[methodName];
-                return await method(...args).call()
+                let ret =  await method(...args).call();
+                return ret;
             }
         } catch (e) {
-            console.log('contract.call: ', e)
+             console.log('exception',e);
+             throw e;
         }
     }
 };

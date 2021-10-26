@@ -5,9 +5,10 @@
   "description": "Contracts for an Nightfall project.",
   "main": "main.js",
   "scripts": {
-    "test": "node test.js",
+    "test": "node --experimental-json-modules rpc/DeltaContract/server.js",
     "deploy": "node src/deploy.js",
-    "server": "node rpc/server.js"
+    "server": "node rpc/server.js",
+    "test2": "node src/test.js"
   },
   "author": "maowei@yuanben.org",
   "license": "ISC",
