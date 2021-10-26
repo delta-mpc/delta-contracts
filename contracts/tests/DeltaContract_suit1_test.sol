@@ -50,7 +50,7 @@ contract DeltaContractTest {
         }catch Error(string memory error) {
             Assert.equal(error,"commitment length exceeds limit or it is empty","uploadSeedCommitmentTests failed");
         }
-        taskDeveloper.startCalculate(t_id,1);
+        taskDeveloper.startCalculate(t_id,1,lst);
         try clientB.uploadSeedCommitment(t_id,1,address(clientA),seedCmmt) {
             Assert.ok(false,"should throw exception4");
         } catch Error(string memory error) {
@@ -97,7 +97,7 @@ contract DeltaContractTest {
         }catch Error(string memory error) {
             Assert.equal(error,"commitment length exceeds limit or it is empty","uploadSkMaskCommitmentTests failed");
         }
-        taskDeveloper.startCalculate(t_id,1);
+        taskDeveloper.startCalculate(t_id,1,lst);
         try clientB.uploadSKCommitment(t_id,1,address(clientA),seedCmmt) {
             Assert.ok(false,"should throw exception4");
         } catch Error(string memory error) {
@@ -117,7 +117,9 @@ contract DeltaContractTest {
         bytes32 t_id = taskDeveloper.createTask("myDataSet",0xa83da95c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e09);
         taskDeveloper.startRound(t_id,1,3000,300);
         clientA.joinRound(t_id,1,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e01,0xe83da96c058c118d61c20dba7a15f44fa0a4c079eff4ca94932f2baf31135e02);
-        try taskDeveloper.startCalculate(t_id,1) {
+        address[] memory lst = new address[](1);
+        lst[0] = address(clientA);
+        try taskDeveloper.startCalculate(t_id,1,lst) {
             Assert.ok(false,"should throw exception");
         } catch Error(string memory error) {
             Assert.equal(error,"This round is not running now","selectCandidatesTest failed");
@@ -146,7 +148,7 @@ contract DeltaContractTest {
         clientA.uploadSeedCommitment(t_id,1,address(clientB),seedCmmt);
         dContract.setMaxWeightCommitmentLength(10);
         bytes memory exceedslimit = new bytes(11);
-        taskDeveloper.startCalculate(t_id,1);
+        taskDeveloper.startCalculate(t_id,1,lst);
         try clientA.uploadResultCommitment(t_id,1,exceedslimit) {
             Assert.ok(false,"should throw exception");
         } catch Error(string memory error) {
@@ -187,7 +189,7 @@ contract DeltaContractTest {
         Assert.ok(true,'should throw exception1');
         dContract.setMaxWeightCommitmentLength(10);
         bytes memory exceedslimit = new bytes(11);
-        taskDeveloper.startCalculate(t_id,1);
+        taskDeveloper.startCalculate(t_id,1,lst);
         clientA.uploadResultCommitment(t_id,1,theBytes);
         try clientA.uploadSeed(t_id,1,address(clientB),seed) {
             Assert.ok(false,'should throw exception1');

@@ -26,8 +26,8 @@ contract Participant {
         theContract.startAggregate(taskId,round,onlineClients);
     }
     
-    function startCalculate(bytes32 taskId,uint64 round) public {
-        theContract.startCalculate(taskId,round);
+    function startCalculate(bytes32 taskId,uint64 round,address[] calldata onlineClients) public {
+        theContract.startCalculate(taskId,round,onlineClients);
     }
     
     function uploadResultCommitment(bytes32 taskId,uint64 round,bytes calldata weightCommitment) public {

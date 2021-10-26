@@ -188,7 +188,7 @@ contract DeltaContract {
       * @dev called by anyone, get Client Pks
       * @return candidate  (pk1,pk2)
       */
-    function getClientPks(bytes32 taskId,uint64 round,address candidateAddr) roundExists(taskId,round) public view returns (Candidate memory candidate) {
+    function getClientPublickeys(bytes32 taskId,uint64 round,address candidateAddr) roundExists(taskId,round) public view returns (Candidate memory candidate) {
         candidate = taskRounds[taskId][round].candidates[candidateAddr];
     }
     
