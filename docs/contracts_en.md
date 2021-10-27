@@ -270,7 +270,7 @@ events:
 [RoundEnded](#RoundEnded)
 
 
-## 合约事件
+## Contract Events
 
 ### TaskCreated
 
