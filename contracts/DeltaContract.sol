@@ -70,7 +70,7 @@ contract DeltaContract {
     event PartnerSelected(bytes32 taskId,uint64 round,address[] addrs);
     
     // triggered when task developer call startAggregateUpload
-    event AggregatStarted(bytes32 taskId,uint64 round,address[] addrs);
+    event AggregateStarted(bytes32 taskId,uint64 round,address[] addrs);
     
     
     // triggered when task developer call startAggregate
@@ -259,7 +259,7 @@ contract DeltaContract {
         for(uint i = 0; i < onlineClients.length; i ++) {
             require(curRound.candidates[onlineClients[i]].pk1 != 0x00,"Candidate must exist");
         }
-        emit AggregatStarted(taskId,round,onlineClients);
+        emit AggregateStarted(taskId,round,onlineClients);
     }
     
     
@@ -370,9 +370,9 @@ contract DeltaContract {
      * @param taskId taskId
      * @param round the task round
      * @param secretkeyMask the crypted skmask
-     * @param sharee the sharee address
+     * @param owner the owner address
      */
-    function uploadSecretkeyMask(bytes32 taskId,uint64 round,address sharee,bytes calldata secretkeyMask) roundExists(taskId,round) public {
+    function uploadSecretkeyMask(bytes32 taskId,uint64 round,address owner,bytes calldata secretkeyMask) roundExists(taskId,round) public {
         require(secretkeyMask.length > 0 && secretkeyMask.length <= maxSSComitmentLength,"commitment length exceeds limit or it is empty");
         TaskRound storage curRound = taskRounds[taskId][round];
         require(curRound.status == RoundStatus.Aggregating,"not in upload ss phase");
@@ -381,10 +381,10 @@ contract DeltaContract {
             commitments.push();
         }
         RoundModelCommitments storage commitment = commitments[round];
-        require(commitment.ssdata[msg.sender][sharee].secretKeyMaskCommitment.length > 0,"must upload commitment first");
-        require(commitment.ssdata[msg.sender][sharee].secretKeyPiece.length == 0,"cannot upload skmask multiple times");
-        commitment.ssdata[msg.sender][sharee].secretKeyPiece = secretkeyMask;
-        emit ContentUploaded(taskId,round,msg.sender,sharee,"SKMASK",secretkeyMask);
+        require(commitment.ssdata[owner][msg.sender].secretKeyMaskCommitment.length > 0,"must upload commitment first");
+        require(commitment.ssdata[owner][msg.sender].secretKeyPiece.length == 0,"cannot upload skmask multiple times");
+        commitment.ssdata[owner][msg.sender].secretKeyPiece = secretkeyMask;
+        emit ContentUploaded(taskId,round,owner,msg.sender,"SKMASK",secretkeyMask);
         // commitment.data[msg.sender].seedCmmtmnt = seedCmmtmnt;
     }
     

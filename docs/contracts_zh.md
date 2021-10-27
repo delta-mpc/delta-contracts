@@ -1,10 +1,86 @@
 # 合约方法文档
 
-## 服务端调用
+## 合约事件
+
+### TaskCreated
+
+任务发布者新建任务时触发
+
+params:
+
+|name | type | description | 
+|---  | ---  | --- |
+| creator | string | 创建者的地址 | 
+| taskId  | bytes32 | 生成的任务Id |
+| dataSet | string | 数据集名称 | 
+| creatorUrl | string | 创建任务的服务器url | 
+| commitment | bytes32 | 任务训练代码的哈希（用于客户端校验任务训练代码）|
+
+### RoundStart
+任务发布者新建任务时触发
+event RoundStart(bytes32 taskId,uint64 round);
+|name | type | description | 
+| --- | ---  | --- |
+| taskId | string | 任务Id|
+| round | uint64 | 轮次 |
+
+### RoundEnd
+任务发布者结束轮次时触发
+event RoundEnd(bytes32 taskId,uint64 round);
+|name | type | description | 
+| --- | ---  | --- |
+| taskId | string | 任务Id|
+| round | uint64 | 轮次 |
+
+
+### PartnerSelected
+任务发布者结束轮次时触发
+event PartnerSelected(bytes32 taskId,uint64 round,address[] addrs);
+|name | type | description | 
+| --- | ---  | --- |
+| taskId | string | 任务Id|
+| round | uint64 | 轮次 |
+| addrs | address[] | 任务发布者选择的节点地址 |
+
+
+### AggregateStarted
+开始安全聚合时触发
+event AggregatStarted(bytes32 taskId,uint64 round,address[] addrs);
+|name | type | description | 
+| --- | ---  | --- |
+| taskId | string | 任务Id|
+| round | uint64 | 轮次 |
+| addrs | address[] | 还在线的节点地址 |
+
+### CalculateStarted
+任务发布者决定开始计算梯度时触发
+event CalculateStarted(bytes32 taskId,uint64 round,address[] addrs);
+
+|name | type | description | 
+| --- | ---  | --- |
+| taskId | string | 任务Id|
+| round | uint64 | 轮次 |
+| addrs | address[] | 已完成secret sharing 的计算节点 |
+
+### ContentUploaded
+计算节点上传内容时触发
+event ContentUploaded(bytes32 taskId,uint64 round,address owner,address sharer,string contentType,bytes content);
+
+|name | type | description | 
+| --- | ---  | --- |
+| taskId | string | 任务Id|
+| round | uint64 | 轮次 |
+| owner | address | 秘密分享的地址 |
+| sharer | address | 秘密分享的对象地址 |
+| contentType | string | 上传的类型 | 
+| content | bytes | 上传的内容 | 
+
+## 合约函数
 
 ### createTask
 
 新建一个任务，并通过事件通知所有节点有新任务创建
+
 
 params：
 
@@ -14,11 +90,9 @@ params：
 | dataset | string | 任务所需要的数据库名称 |
 | commitment | bytes32 | 任务训练代码的哈希（用于客户端校验任务训练代码） |
 
-returns:
+events:
 
-| name | type | description |
-| --- | --- | --- |
-| taskID | bytes32 | 任务ID |
+[TaskCreated](#TaskCreated)
 
 ### startRound
 
@@ -31,7 +105,10 @@ params:
 | taskID | bytes32 | 任务ID |
 | round | uint64 | 开始的轮次 |
 
-no returns
+events:
+
+[RoundStart](#RoundStart)
+
 
 ### selectCandidates
 
@@ -45,7 +122,9 @@ params:
 | round | uint64 | 开始的轮次 |
 | clients | address[] | 被选中的客户端的地址列表 |
 
-no returns
+events:
+
+[PartnerSelected](#PartnerSelected)
 
 ### startCalculate
 
@@ -59,7 +138,9 @@ params:
 | round | uint64 | 开始的轮次 |
 | clients | address[] | 上传过秘密分享的客户端地址列表 |
 
-no returns
+events:
+
+[CalculateStarted](#CalculateStarted)
 
 ### getResultCommitment
 
@@ -92,7 +173,9 @@ params:
 | round | uint64 | 开始的轮次 |
 | clients | address[] | 上传了结果的客户端地址列表 |
 
-no returns
+events:
+
+[AggregateStarted](#AggregateStarted)
 
 ### getSecretSharingData
 
@@ -116,7 +199,6 @@ returns:
 | ssSecretKey | bytes | SK2的秘密分享片段 |
 | ssSecretKeyMaskCmmtmnt | bytes | SK2的秘密分享片段哈希 |
 
-## 客户端调用
 
 ### joinRound
 
@@ -131,14 +213,8 @@ params:
 | pk1 | bytes32 | 公钥，用于客户端之间生成加密信道 |
 | pk2 | bytes32 | 公钥，用于生成加密结果的mask |
 
-returns:
 
-| name | type | description |
-| --- | --- | --- |
-| success | bool | 是否加入成功 |
-
-
-### getClientPKs
+### getClientPublickeys
 
 获取某客户端上传的公钥PK1和PK2。
 
@@ -148,7 +224,7 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | 任务ID |
 | round | uint64 | 轮次 |
-| client | address | 客户端地址 |
+| candidateAddr | address | 客户端地址 |
 
 returns:
 
@@ -171,9 +247,10 @@ params:
 | sharer | address | 秘密分享的目标 |
 | seedCommitment | bytes | 随机种子的哈希 |
 
-no returns
+events:
+[ContentUploaded](#ContentUploaded)(任务ID,轮次，随机种子的拥有者，秘密分享的目标，"SEEDCMMT",随机种子的哈希)
 
-### uploadSKCommitment
+### uploadSecretKeyCommitment
 
 上传SK2的秘密分享片段的哈希
 
@@ -187,7 +264,8 @@ params:
 | sharer | address | 秘密分享的目标 |
 | skCommitment | bytes | SK2的哈希 |
 
-no returns
+events:
+[ContentUploaded](#ContentUploaded)(任务ID,轮次，随机种子的拥有者，秘密分享的目标，"SKMASKCMMT",SK2的哈希)
 
 ### uploadResultCommitment
 
@@ -201,9 +279,10 @@ params:
 | round | uint64 | 轮次 |
 | commitment | bytes | 本轮训练结果（权重或梯度）的哈希 |
 
-no returns
+events:
+[ContentUploaded](#ContentUploaded)(任务ID,轮次，上传者，null，"WEIGHT",本轮训练结果（权重或梯度）的哈希)
 
-### uploadSSeed
+### uploadSeed
 
 聚合阶段，上传在线客户端的加密Mask的随机种子的秘密分享片段
 
@@ -213,12 +292,13 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | 任务ID |
 | round | uint64 | 轮次 |
-| owner | address | 随机种子的拥有者（在线的客户端） |
-| sseed | bytes | 随机种子的秘密分享片段 |
+| sharee | address | 秘密分享的目标 | 
+| seed | bytes | 随机种子的秘密分享片段 |
 
-no returns
+events:
+[ContentUploaded](#ContentUploaded)(任务ID,轮次,Seed的拥有者（在线的客户端）,秘密分享的目标，"SEED",随机种子的秘密分享片段)
 
-### uploadSkMask
+### uploadSecretkeyMask
 
 聚合阶段，上传离线客户端的SK2的秘密分享片段
 
@@ -228,8 +308,22 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | 任务ID |
 | round | uint64 | 轮次 |
-| owner | address | SK2的拥有者（离线的客户端） |
+| owner | address | SK2的拥有者（离线的客户端） | 
 | skmask | bytes | SK2的秘密分享片段 |
 
+events:
+[ContentUploaded](#ContentUploaded)(任务ID,轮次,SK2的拥有者（离线的客户端）,秘密分享的目标（调用者），"SKMASK",SK2的秘密分享片段)
 
-no returns
+### endRound
+
+结束本轮训练
+
+params:
+
+| name | type | description |
+| --- | --- | --- |
+| taskId | bytes32 | 任务ID |
+| round | uint64 | 轮次 |
+
+events:
+[RoundEnd](#RoundEnd)(任务ID,轮次)

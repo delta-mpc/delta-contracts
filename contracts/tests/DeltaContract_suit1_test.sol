@@ -208,8 +208,8 @@ contract DeltaContractTest {
         } catch Error(string memory error) {
             Assert.equal(error,"cannot upload seed multiple times","uploadWeightCommitmentTests failed");
         }
-        clientA.uploadSecretkeyMask(t_id,1,address(clientB),skmask);
-        try clientA.uploadSecretkeyMask(t_id,1,address(clientB),skmask) {
+        clientB.uploadSecretkeyMask(t_id,1,address(clientA),skmask);
+        try clientB.uploadSecretkeyMask(t_id,1,address(clientA),skmask) {
             Assert.ok(false,'should throw exception');
         } catch Error(string memory error) {
             Assert.equal(error,"cannot upload skmask multiple times","uploadWeightCommitmentTests failed");
