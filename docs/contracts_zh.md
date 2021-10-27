@@ -271,7 +271,7 @@ params:
 
 |name | type | description | 
 |---  | ---  | --- |
-| creator | string | 创建者的地址 | 
+| creator | address | 创建者的地址 | 
 | taskId  | bytes32 | 生成的任务Id |
 | dataSet | string | 数据集名称 | 
 | creatorUrl | string | 创建任务的服务器url | 
@@ -385,3 +385,5 @@ event ResultUploaded(bytes32 taskId,uint64 round,address owner,bytes content);
 | round | uint64 | 轮次 |
 | owner | address | 梯度计算者的地址 |
 | content | bytes | 梯度的上传内容 | 
+
+
