@@ -349,7 +349,7 @@ contract DeltaContract {
      * @param sharee the sharee address
      * @param secretKeyCommitment secret sharing piece of seed mask
      */
-    function uploadSKCommitment(bytes32 taskId,uint64 round,address sharee,bytes calldata secretKeyCommitment) roundExists(taskId,round) public {
+    function uploadSecretKeyCommitment(bytes32 taskId,uint64 round,address sharee,bytes calldata secretKeyCommitment) roundExists(taskId,round) public {
         require(secretKeyCommitment.length > 0 && secretKeyCommitment.length <= maxSSComitmentLength,"commitment length exceeds limit or it is empty");
         TaskRound storage curRound = taskRounds[taskId][round];
         require(curRound.status == RoundStatus.Running,"not in secret sharing phase");

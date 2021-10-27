@@ -38,7 +38,7 @@ contract Participant {
         theContract.uploadSeedCommitment(taskId,round,sharee,sseedcmmt);
     }
     function uploadSKCommitment(bytes32 taskId,uint64 round,address sharee,bytes calldata skmaskcmmt)  public {
-        theContract.uploadSKCommitment(taskId,round,sharee,skmaskcmmt);
+        theContract.uploadSecretKeyCommitment(taskId,round,sharee,skmaskcmmt);
     }
     
     function uploadSeed(bytes32 taskId,uint64 round,address sharee,bytes calldata sseed) public {
