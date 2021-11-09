@@ -10,7 +10,6 @@ params：
 
 | name | type | description |
 | --- | --- | --- |
-| creatorUrl | string | server url|
 | dataset | string | the dataset name for this computation task |
 | commitment | bytes32 | hash of the training code (for client validation purpose)|
 
