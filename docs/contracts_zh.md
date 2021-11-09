@@ -1,4 +1,4 @@
-# 合约方法文档
+# 横向联邦学习合约方法文档
 
 ## 合约函数
 
@@ -11,7 +11,6 @@ params：
 
 | name | type | description |
 | --- | --- | --- |
-| creatorUrl | string | 创建任务的服务器url |
 | dataset | string | 任务所需要的数据库名称 |
 | commitment | bytes32 | 任务训练代码的哈希（用于客户端校验任务训练代码） |
 
