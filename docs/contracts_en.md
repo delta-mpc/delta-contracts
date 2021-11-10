@@ -248,7 +248,7 @@ params:
 | taskID | bytes32 | task ID |
 | round | uint64 | the sequence number of round |
 | owner | address | owner of SK2 (must be an offline clients in this context) | 
-| skmask | bytes | piece of SK2 |
+| skMask | bytes | piece of SK2 |
 
 events:
 [SecretKeyUploaded](#SecretKeyUploaded)
@@ -262,7 +262,7 @@ params:
 
 | name | type | description |
 | --- | --- | --- |
-| taskId | bytes32 | task id |
+| taskID | bytes32 | task id |
 | round | uint64 | the sequence number of round |
 
 events:
@@ -279,28 +279,28 @@ params:
 
 |name | type | description | 
 |---  | ---  | --- |
-| creator | address | creator address | 
-| taskId  | bytes32 | task id |
+| address | address | address of node which create this task | 
+| taskID  | bytes32 | task id |
 | dataSet | string | dataset name | 
-| creatorUrl | string | server url provided by creator| 
+| url | string | server url of the node | 
 | commitment | bytes32 | training code hash|
 
 ### RoundStarted
 triggered upon starting a new round
 
-event RoundStarted(bytes32 taskId,uint64 round);
+event RoundStarted(bytes32 taskID,uint64 round);
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | task Id|
+| taskID | string | task ID|
 | round | uint64 | the sequence number of round |
 
 ### RoundEnded
 triggered upon finishing round 
 
-event RoundEnded(bytes32 taskId,uint64 round);
+event RoundEnded(bytes32 taskID,uint64 round);
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | task id|
+| taskID | string | task id|
 | round | uint64 | the sequence number of round |
 
 
@@ -308,10 +308,10 @@ event RoundEnded(bytes32 taskId,uint64 round);
 triggered upon task developer selecting candidates
 
 
-event PartnerSelected(bytes32 taskId,uint64 round,address[] addrs);
+event PartnerSelected(bytes32 taskID,uint64 round,address[] addrs);
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | task Id|
+| taskID | string | task ID|
 | round | uint64 | the sequence number of round |
 | addrs | address[] | chosen addresses |
 
@@ -319,31 +319,31 @@ event PartnerSelected(bytes32 taskId,uint64 round,address[] addrs);
 ### AggregateStarted
 
 triggered upon the inauguration of aggregating phase
-event AggregatStarted(bytes32 taskId,uint64 round,address[] addrs);
+event AggregatStarted(bytes32 taskID,uint64 round,address[] addrs);
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | task id|
+| taskID | string | task id|
 | round | uint64 | the sequence number of round |
 | addrs | address[] | online addresses |
 
 ### CalculateStarted
 
 triggered upon the moment of task developer deciding to calculate gradients
-event CalculateStarted(bytes32 taskId,uint64 round,address[] addrs);
+event CalculateStarted(bytes32 taskID,uint64 round,address[] addrs);
 
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | task id|
+| taskID | string | task id|
 | round | uint64 | the sequence number of round |
 | addrs | address[] | computation nodes that has finished secret sharing |
 
 ### SeedUploaded
 triggered upon seed uploading succeeded
-event SeedUploaded(bytes32 taskId,uint64 round,address owner,address sharee,bytes content);
+event SeedUploaded(bytes32 taskID,uint64 round,address owner,address sharee,bytes content);
 
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | task Id|
+| taskID | string | task ID|
 | round | uint64 | the sequence number of round |
 | owner | address | owner address |
 | sharee | address | sharee address |
@@ -353,11 +353,11 @@ event SeedUploaded(bytes32 taskId,uint64 round,address owner,address sharee,byte
 ### SeedCommitmentUploaded
 triggered upon seed commitment uploading succeeded
 
-event SeedCommitmentUploaded(bytes32 taskId,uint64 round,address owner,address sharee,bytes content);
+event SeedCommitmentUploaded(bytes32 taskID,uint64 round,address owner,address sharee,bytes content);
 
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | task Id|
+| taskID | string | task ID|
 | round | uint64 | the sequence number of round |
 | owner | address | owner address |
 | sharee | address | sharee address  |
@@ -367,11 +367,11 @@ event SeedCommitmentUploaded(bytes32 taskId,uint64 round,address owner,address s
 ### SecretKeyCommitmentUploaded
 triggered upon SecretKey commitment uploading succeeded
 
-event SecretKeyCommitmentUploaded(bytes32 taskId,uint64 round,address owner,address sharee,bytes content);
+event SecretKeyCommitmentUploaded(bytes32 taskID,uint64 round,address owner,address sharee,bytes content);
 
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | task id|
+| taskID | string | task id|
 | round | uint64 | round number |
 | owner | address | owner address |
 | sharer | address | sharee address |
@@ -381,11 +381,11 @@ event SecretKeyCommitmentUploaded(bytes32 taskId,uint64 round,address owner,addr
 ### SecretKeyUploaded
 triggered upon SecretKey uploading succeeded
 
-event SeedCommitmentUploaded(bytes32 taskId,uint64 round,address owner,address sharer,bytes content);
+event SeedCommitmentUploaded(bytes32 taskID,uint64 round,address owner,address sharer,bytes content);
 
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | task Id|
+| taskID | string | task ID|
 | round | uint64 | round number |
 | owner | address | owner address |
 | sharee | address | sharee address |
@@ -395,11 +395,11 @@ event SeedCommitmentUploaded(bytes32 taskId,uint64 round,address owner,address s
 ### ResultUploaded
 
 triggered upon Result uploading succeeded
-event ResultUploaded(bytes32 taskId,uint64 round,address owner,bytes content);
+event ResultUploaded(bytes32 taskID,uint64 round,address owner,bytes content);
 
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | task Id|
+| taskID | string | task ID|
 | round | uint64 | round number |
 | owner | address | owner address |
 | content | bytes | result | 
