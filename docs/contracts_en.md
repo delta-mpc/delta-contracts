@@ -52,7 +52,7 @@ events:
 [PartnerSelected](#PartnerSelected)
 
 
-### startCalculate
+### startCalculation
 
 Start calculating phase and at the same time close the secret sharing phase. 
 The address of those who has done the secret sharing will be broadcasted via events
@@ -90,7 +90,7 @@ returns:
 | commitment | bytes | the hash of this commitment |
 
 
-### startAggregate
+### startAggregation
 
 start aggregating phase as well as ending calculating phase, broadcasting 
 the address list of clients who has uploaded result.
@@ -120,8 +120,8 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | task ID |
 | round | uint64 | the sequence number of round |
-| owner | address | the owner address |
-| sharee | address | the sharee address |
+| sender | address | the sender address |
+| receiver | address | the receiver address |
 
 returns:
 
@@ -178,8 +178,8 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | task ID |
 | round | uint64 | the sequence number of round |
-| owner | address| seed owner |
-| sharee | address | seed sharee |
+| sender | address| seed sender |
+| receiver | address | seed receiver |
 | seedCommitment | bytes | seed hash |
 
 events:
@@ -195,8 +195,8 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | task id |
 | round | uint64 | the sequence number of round |
-| owner | address| secret key owner |
-| sharee | address | secret key sharee |
+| sender | address| secret key sender |
+| receiver | address | secret key receiver |
 | skCommitment | bytes | secret key hash |
 
 events:
@@ -230,7 +230,7 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | task id |
 | round | uint64 | the sequence number of round |
-| sharee | address | sharee address | 
+| receiver | address | receiver address | 
 | seed | bytes | seed to upload |
 
 events:
@@ -247,7 +247,7 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | task ID |
 | round | uint64 | the sequence number of round |
-| owner | address | owner of SK2 (must be an offline clients in this context) | 
+| sender | address | sender of SK2 (must be an offline clients in this context) | 
 | skMask | bytes | piece of SK2 |
 
 events:
@@ -339,69 +339,69 @@ event CalculateStarted(bytes32 taskID,uint64 round,address[] addrs);
 
 ### SeedUploaded
 triggered upon seed uploading succeeded
-event SeedUploaded(bytes32 taskID,uint64 round,address owner,address sharee,bytes content);
+event SeedUploaded(bytes32 taskID,uint64 round,address sender,address receiver,bytes content);
 
 |name | type | description | 
 | --- | ---  | --- |
 | taskID | string | task ID|
 | round | uint64 | the sequence number of round |
-| owner | address | owner address |
-| sharee | address | sharee address |
+| sender | address | sender address |
+| receiver | address | receiver address |
 | seed | bytes | seed | 
 
 
 ### SeedCommitmentUploaded
 triggered upon seed commitment uploading succeeded
 
-event SeedCommitmentUploaded(bytes32 taskID,uint64 round,address owner,address sharee,bytes content);
+event SeedCommitmentUploaded(bytes32 taskID,uint64 round,address sender,address receiver,bytes content);
 
 |name | type | description | 
 | --- | ---  | --- |
 | taskID | string | task ID|
 | round | uint64 | the sequence number of round |
-| owner | address | owner address |
-| sharee | address | sharee address  |
+| sender | address | sender address |
+| receiver | address | receiver address  |
 | content | bytes | seed hash | 
 
 
 ### SecretKeyCommitmentUploaded
 triggered upon SecretKey commitment uploading succeeded
 
-event SecretKeyCommitmentUploaded(bytes32 taskID,uint64 round,address owner,address sharee,bytes content);
+event SecretKeyCommitmentUploaded(bytes32 taskID,uint64 round,address sender,address receiver,bytes content);
 
 |name | type | description | 
 | --- | ---  | --- |
 | taskID | string | task id|
 | round | uint64 | round number |
-| owner | address | owner address |
-| sharer | address | sharee address |
+| sender | address | sender address |
+| receiver | address | receiver address |
 | content | bytes | sk2 hash | 
 
 
 ### SecretKeyUploaded
 triggered upon SecretKey uploading succeeded
 
-event SeedCommitmentUploaded(bytes32 taskID,uint64 round,address owner,address sharer,bytes content);
+event SeedCommitmentUploaded(bytes32 taskID,uint64 round,address sender,address receiver,bytes content);
 
 |name | type | description | 
 | --- | ---  | --- |
 | taskID | string | task ID|
 | round | uint64 | round number |
-| owner | address | owner address |
-| sharee | address | sharee address |
+| sender | address | sender address |
+| receiver | address | receiver address |
 | content | bytes | sk2 | 
 
 
 ### ResultUploaded
 
 triggered upon Result uploading succeeded
-event ResultUploaded(bytes32 taskID,uint64 round,address owner,bytes content);
+event ResultUploaded(bytes32 taskID,uint64 round,address sender,bytes content);
 
 |name | type | description | 
 | --- | ---  | --- |
 | taskID | string | task ID|
 | round | uint64 | round number |
-| owner | address | owner address |
+| sender | address | sender address |
 | content | bytes | result | 
 
 
