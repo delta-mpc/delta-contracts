@@ -51,7 +51,7 @@ events:
 [PartnerSelected](#PartnerSelected)
 
 
-### startCalculate
+### startCalculation
 
 开始计算阶段，并结束本轮训练的秘密分享阶段。通过事件广播上传过秘密分享的客户端地址列表。
 
@@ -87,7 +87,7 @@ returns:
 | commitment | bytes | 目标客户端结果的哈希 |
 
 
-### startAggregate
+### startAggregation
 
 开始聚合阶段，并结束本轮训练的计算阶段。通过事件广播上传了结果的客户端地址列表。
  
@@ -114,8 +114,8 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | 任务ID |
 | round | uint64 | 开始的轮次 |
-| owner | address | 随机种子的拥有者 |
-| sharee | address | 秘密分享的目标 |
+| sender | address | 随机种子的拥有者 |
+| receiver | address | 秘密分享的目标 |
 
 returns:
 
@@ -151,7 +151,7 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | 任务ID |
 | round | uint64 | 轮次 |
-| candidateAddr | address | 客户端地址 |
+| candidateAddress | address | 客户端地址 |
 
 returns:
 
@@ -170,8 +170,8 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | 任务ID |
 | round | uint64 | 轮次 |
-| owner | address| 随机种子的拥有者 |
-| sharer | address | 秘密分享的目标 |
+| sender | address| 随机种子的拥有者 |
+| recevier | address | 秘密分享的目标 |
 | seedCommitment | bytes | 随机种子的哈希 |
 
 events:
@@ -187,8 +187,8 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | 任务ID |
 | round | uint64 | 轮次 |
-| owner | address| 随机种子的拥有者 |
-| sharer | address | 秘密分享的目标 |
+| sender | address| 随机种子的拥有者 |
+| receiver | address | 秘密分享的目标 |
 | skCommitment | bytes | SK2的哈希 |
 
 events:
@@ -221,7 +221,7 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | 任务ID |
 | round | uint64 | 轮次 |
-| sharee | address | 秘密分享的目标 | 
+| receiver | address | 秘密分享的目标 | 
 | seed | bytes | 随机种子的秘密分享片段 |
 
 events:
@@ -238,8 +238,8 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | 任务ID |
 | round | uint64 | 轮次 |
-| owner | address | SK2的拥有者（离线的客户端） | 
-| skmask | bytes | SK2的秘密分享片段 |
+| sender | address | SK2的拥有者（离线的客户端） | 
+| skMask | bytes | SK2的秘密分享片段 |
 
 events:
 [SecretKeyUploaded](#SecretKeyUploaded)
@@ -253,7 +253,7 @@ params:
 
 | name | type | description |
 | --- | --- | --- |
-| taskId | bytes32 | 任务ID |
+| taskID | bytes32 | 任务ID |
 | round | uint64 | 轮次 |
 
 events:
@@ -270,119 +270,119 @@ params:
 
 |name | type | description | 
 |---  | ---  | --- |
-| creator | address | 创建者的地址 | 
-| taskId  | bytes32 | 生成的任务Id |
+| address | address | 创建者的地址 | 
+| taskID  | bytes32 | 生成的任务ID |
 | dataSet | string | 数据集名称 | 
-| creatorUrl | string | 创建任务的服务器url | 
+| url | string | 创建任务的服务器url | 
 | commitment | bytes32 | 任务训练代码的哈希（用于客户端校验任务训练代码）|
 
 ### RoundStarted
 任务发布者新建任务时触发
-event RoundStarted(bytes32 taskId,uint64 round);
+event RoundStarted(bytes32 taskID,uint64 round);
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | 任务Id|
+| taskID | string | 任务ID|
 | round | uint64 | 轮次 |
 
 ### RoundEnded
 任务发布者结束轮次时触发
-event RoundEnded(bytes32 taskId,uint64 round);
+event RoundEnded(bytes32 taskID,uint64 round);
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | 任务Id|
+| taskID | string | 任务ID|
 | round | uint64 | 轮次 |
 
 
 ### PartnerSelected
 任务发布者结束轮次时触发
-event PartnerSelected(bytes32 taskId,uint64 round,address[] addrs);
+event PartnerSelected(bytes32 taskID,uint64 round,address[] address);
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | 任务Id|
+| taskID | string | 任务ID|
 | round | uint64 | 轮次 |
-| addrs | address[] | 任务发布者选择的节点地址 |
+| address | address[] | 任务发布者选择的节点地址 |
 
 
 ### AggregateStarted
 开始安全聚合时触发
-event AggregatStarted(bytes32 taskId,uint64 round,address[] addrs);
+event AggregatStarted(bytes32 taskID,uint64 round,address[] address);
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | 任务Id|
+| taskID | string | 任务ID|
 | round | uint64 | 轮次 |
-| addrs | address[] | 还在线的节点地址 |
+| address | address[] | 还在线的节点地址 |
 
 ### CalculateStarted
 任务发布者决定开始计算梯度时触发
-event CalculateStarted(bytes32 taskId,uint64 round,address[] addrs);
+event CalculateStarted(bytes32 taskID,uint64 round,address[] address);
 
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | 任务Id|
+| taskID | string | 任务ID|
 | round | uint64 | 轮次 |
-| addrs | address[] | 已完成secret sharing 的计算节点 |
+| address | address[] | 已完成secret sharing 的计算节点 |
 
 ### SeedUploaded
 计算节点上传内容时触发
-event SeedUploaded(bytes32 taskId,uint64 round,address owner,address sharer,bytes content);
+event SeedUploaded(bytes32 taskID,uint64 round,address sender,address receiver,bytes content);
 
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | 任务Id|
+| taskID | string | 任务ID|
 | round | uint64 | 轮次 |
-| owner | address | 秘密分享拥有者的地址 |
-| sharer | address | 秘密分享的对象地址 |
+| sender | address | 秘密分享拥有者的地址 |
+| receiver | address | 秘密分享的对象地址 |
 | seed | bytes | 随机种子的秘密分享碎片 | 
 
 
 ### SeedCommitmentUploaded
 计算节点上传内容时触发
-event SeedCommitmentUploaded(bytes32 taskId,uint64 round,address owner,address sharer,bytes content);
+event SeedCommitmentUploaded(bytes32 taskID,uint64 round,address sender,address receiver,bytes content);
 
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | 任务Id|
+| taskID | string | 任务ID|
 | round | uint64 | 轮次 |
-| owner | address | 秘密分享拥有者的地址 |
-| sharer | address | 秘密分享的对象地址 |
+| sender | address | 秘密分享拥有者的地址 |
+| receiver | address | 秘密分享的对象地址 |
 | commitment | bytes | 随机种子的哈希 | 
 
 
 ### SecretKeyCommitmentUploaded
 计算节点上传内容时触发
-event SecretKeyCommitmentUploaded(bytes32 taskId,uint64 round,address owner,address sharer,bytes content);
+event SecretKeyCommitmentUploaded(bytes32 taskID,uint64 round,address sender,address receiver,bytes content);
 
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | 任务Id|
+| taskID | string | 任务ID|
 | round | uint64 | 轮次 |
-| owner | address | Sk2密钥的拥有者地址 |
-| sharer | address | 秘密分享的目标地址 |
+| sender | address | Sk2密钥的拥有者地址 |
+| receiver | address | 秘密分享的目标地址 |
 | commitment | bytes | Sk2秘密分享的哈希 | 
 
 
 ### SecretKeyUploaded
 计算节点上传内容时触发
-event SeedCommitmentUploaded(bytes32 taskId,uint64 round,address owner,address sharer,bytes content);
+event SeedCommitmentUploaded(bytes32 taskID,uint64 round,address sender,address receiver,bytes content);
 
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | 任务Id|
+| taskID | string | 任务ID|
 | round | uint64 | 轮次 |
-| owner | address | SK2秘密分享拥有者的地址 |
-| sharer | address | SK2秘密分享的对象地址 |
+| sender | address | SK2秘密分享拥有者的地址 |
+| receiver | address | SK2秘密分享的对象地址 |
 | content | bytes | sk2的秘密分享碎片 | 
 
 
 ### ResultUploaded
 计算节点上传内容时触发
-event ResultUploaded(bytes32 taskId,uint64 round,address owner,bytes content);
+event ResultUploaded(bytes32 taskID,uint64 round,address sender,bytes content);
 
 |name | type | description | 
 | --- | ---  | --- |
-| taskId | string | 任务Id|
+| taskID | string | 任务ID|
 | round | uint64 | 轮次 |
-| owner | address | 梯度计算者的地址 |
+| sender | address | 梯度计算者的地址 |
 | content | bytes | 梯度的上传内容 | 
 
 
