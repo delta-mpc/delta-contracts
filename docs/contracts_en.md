@@ -147,6 +147,27 @@ params:
 | pk1 | bytes32 | public key,used for secret channel establishment |
 | pk2 | bytes32 | public key,used for generating cyphered mask |
 
+### getTaskRound
+
+get task round information
+
+
+params:
+
+| name | type | description |
+| --- | --- | --- |
+| taskID | bytes32 | task ID|
+| round | uint64 | the sequence number of round |
+
+returns:
+
+| name | type | description |
+| --- | --- | --- |
+| currentRound | uint64 | current round |
+| maxSample | uint32 | maxium count of sample |
+| minSample | uint32 | minimum count of sample |
+| status | uint8 | status of round |
+| joinedAddrs | uint8 | array of the addresses' of joined candidates  |
 
 ### getClientPublickeys
 
