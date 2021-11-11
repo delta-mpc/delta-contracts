@@ -33,6 +33,28 @@ events:
 
 [RoundStarted](#RoundStarted)
 
+### getTaskRound
+
+获取任务轮次信息
+
+
+params:
+
+| name | type | description |
+| --- | --- | --- |
+| taskID | bytes32 | 任务ID|
+| round | uint64 | 任务轮次 |
+
+returns:
+
+| name | type | description |
+| --- | --- | --- |
+| currentRound | uint64 | 当前轮次 |
+| maxSample | uint32 | 最大样本数 |
+| minSample | uint32 | 最小样本数 |
+| status | uint8 | 轮次状态 |
+| joinedAddrs | uint8 | 已加入的计算节点  |
+
 
 ### selectCandidates
 
