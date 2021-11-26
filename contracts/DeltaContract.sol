@@ -37,8 +37,8 @@ contract DeltaContract {
     }
 
     struct Candidate {
-        bytes32 pk1;
-        bytes32 pk2;
+        bytes pk1;
+        bytes pk2;
     }
 
     struct TaskRound {
@@ -230,8 +230,8 @@ contract DeltaContract {
     function joinRound(
         bytes32 taskId,
         uint64 round,
-        bytes32 pk1,
-        bytes32 pk2
+        bytes calldata pk1,
+        bytes calldata pk2
     ) public taskExists(taskId) roundExists(taskId, round) returns (bool) {
         TaskRound[] storage rounds = taskRounds[taskId];
         TaskRound storage thisRound = rounds[rounds.length - 1];
@@ -241,7 +241,7 @@ contract DeltaContract {
             "join phase has passed"
         );
         require(
-            thisRound.candidates[msg.sender].pk1 == 0x0,
+            thisRound.candidates[msg.sender].pk1.length == 0,
             "Cannot join the same round multiple times"
         );
         thisRound.candidates[msg.sender] = Candidate({pk1: pk1, pk2: pk2});
@@ -302,7 +302,7 @@ contract DeltaContract {
         TaskRound storage curRound = taskRounds[taskId][round];
         for (uint256 i = 0; i < addrs.length; i++) {
             require(
-                curRound.candidates[addrs[i]].pk1 != 0x00,
+                curRound.candidates[addrs[i]].pk1.length > 0,
                 "Candidate must exist"
             );
         }
@@ -376,7 +376,7 @@ contract DeltaContract {
         curRound.status = RoundStatus.Aggregating;
         for (uint256 i = 0; i < onlineClients.length; i++) {
             require(
-                curRound.candidates[onlineClients[i]].pk1 != 0x00,
+                curRound.candidates[onlineClients[i]].pk1.length > 0,
                 "Candidate must exist"
             );
         }
