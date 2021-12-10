@@ -199,7 +199,6 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | task ID |
 | round | uint64 | the sequence number of round |
-| sender | address| seed sender |
 | receiver | address | seed receiver |
 | seedCommitment | bytes | seed hash |
 
@@ -216,7 +215,6 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | task id |
 | round | uint64 | the sequence number of round |
-| sender | address| secret key sender |
 | receiver | address | secret key receiver |
 | skCommitment | bytes | secret key hash |
 
@@ -251,7 +249,7 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | task id |
 | round | uint64 | the sequence number of round |
-| receiver | address | receiver address | 
+| sender | address | sender address | 
 | seed | bytes | seed to upload |
 
 events:
