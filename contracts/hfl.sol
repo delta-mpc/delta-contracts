@@ -5,10 +5,10 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./Identity.sol";
 
 /**
- * @title Delta Contract
- * @dev Delta Contract For Mpc
+ * @title Horizontal Federated Learning Task Contract
+ * @dev Horizontal Federated Learning Task Contract
  */
-contract DeltaContract {
+contract HFLContract {
     IdentityContract public idContract;
 
     address private owner;

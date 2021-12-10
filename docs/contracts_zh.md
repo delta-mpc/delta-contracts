@@ -192,7 +192,6 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | 任务ID |
 | round | uint64 | 轮次 |
-| sender | address| 随机种子的拥有者 |
 | recevier | address | 秘密分享的目标 |
 | seedCommitment | bytes | 随机种子的哈希 |
 
@@ -209,7 +208,6 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | 任务ID |
 | round | uint64 | 轮次 |
-| sender | address| 随机种子的拥有者 |
 | receiver | address | 秘密分享的目标 |
 | skCommitment | bytes | SK2的哈希 |
 
@@ -243,7 +241,7 @@ params:
 | --- | --- | --- |
 | taskID | bytes32 | 任务ID |
 | round | uint64 | 轮次 |
-| receiver | address | 秘密分享的目标 | 
+| sender | address | 秘密分享的目标 | 
 | seed | bytes | 随机种子的秘密分享片段 |
 
 events:
