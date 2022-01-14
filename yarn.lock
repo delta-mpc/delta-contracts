@@ -209,6 +209,16 @@
     "lodash.camelcase" "^4.3.0"
     "protobufjs" "^6.8.6"
 
+"@poanet/solidity-flattener@^3.0.6":
+  "integrity" "sha1-dlAGvSIntuXFoHG6KoVYlRIjTE0="
+  "resolved" "https://registry.npmmirror.com/@poanet/solidity-flattener/download/@poanet/solidity-flattener-3.0.6.tgz"
+  "version" "3.0.6"
+  dependencies:
+    "bunyan" "^1.8.12"
+    "decomment" "^0.9.1"
+    "glob-promise" "^3.4.0"
+    "path" "^0.12.7"
+
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
   "integrity" "sha1-m4sMxmPWaafY9vXQiToU00jzD78="
   "resolved" "https://registry.npmjs.org/@protobufjs/aspromise/-/aspromise-1.1.2.tgz"
@@ -288,10 +298,23 @@
   dependencies:
     "@types/node" "*"
 
+"@types/glob@*":
+  "integrity" "sha1-vBtb86qS8lvV3TnzXFc2G9zlsus="
+  "resolved" "https://registry.npmmirror.com/@types/glob/download/@types/glob-7.2.0.tgz"
+  "version" "7.2.0"
+  dependencies:
+    "@types/minimatch" "*"
+    "@types/node" "*"
+
 "@types/long@^4.0.1":
   "integrity" "sha512-5tXH6Bx/kNGd3MgffdmP4dy2Z+G4eaXw0SE81Tq3BNadtnMR5/ySMzX4SLEzHJzSmPNn4HIdpQsBvXMUykr58w=="
   "resolved" "https://registry.npmjs.org/@types/long/-/long-4.0.1.tgz"
   "version" "4.0.1"
+
+"@types/minimatch@*":
+  "integrity" "sha1-EAHMXmo3BLg8I2An538vWOoBD0A="
+  "resolved" "https://registry.npmmirror.com/@types/minimatch/download/@types/minimatch-3.0.5.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2F%40types%2Fminimatch%2Fdownload%2F%40types%2Fminimatch-3.0.5.tgz"
+  "version" "3.0.5"
 
 "@types/node@*", "@types/node@>=12.12.47", "@types/node@>=13.7.0":
   "integrity" "sha512-EITwVTX5B4nDjXjGeQAfXOrm+Jn+qNjDmyDRtWoD+wZsl/RDPRTFRKivs4Mt74iOFlLOrE5+Kf+p5yjyhm3+cA=="
@@ -596,6 +619,16 @@
   dependencies:
     "node-gyp-build" "^4.2.0"
 
+"bunyan@^1.8.12":
+  "integrity" "sha1-jONMqQihfQd2V2yhsvbL2RbpO0Y="
+  "resolved" "https://registry.npm.taobao.org/bunyan/download/bunyan-1.8.15.tgz"
+  "version" "1.8.15"
+  optionalDependencies:
+    "dtrace-provider" "~0.8"
+    "moment" "^2.19.3"
+    "mv" "~2"
+    "safe-json-stringify" "~1"
+
 "bytes@3.1.0":
   "integrity" "sha512-zauLjrfCG+xvoyaqLoV8bLVXXNGC4JqlxFCutSDWA6fJrTo2ZuvLYTqZ7aHBLZSMOopbzwv8f+wZcVzfVTI2Dg=="
   "resolved" "https://registry.npmjs.org/bytes/-/bytes-3.1.0.tgz"
@@ -817,6 +850,13 @@
   "resolved" "https://registry.npmjs.org/decode-uri-component/-/decode-uri-component-0.2.0.tgz"
   "version" "0.2.0"
 
+"decomment@^0.9.1":
+  "integrity" "sha512-h0TZ8t6Dp49duwyDHo3iw67mnh9/UpFiSSiOb5gDK1sqoXzrfX/SQxIUQd2R2QEiSnqib0KF2fnKnGfAhAs6lg=="
+  "resolved" "https://registry.npmmirror.com/decomment/download/decomment-0.9.5.tgz"
+  "version" "0.9.5"
+  dependencies:
+    "esprima" "4.0.1"
+
 "decompress-response@^3.2.0", "decompress-response@^3.3.0":
   "integrity" "sha1-gKTdMjdIOEv6JICDYirt7Jgq3/M="
   "resolved" "https://registry.npmjs.org/decompress-response/-/decompress-response-3.3.0.tgz"
@@ -872,6 +912,13 @@
   "integrity" "sha512-6QvTW9mrGeIegrFXdtQi9pk7O/nSK6lSdXW2eqUspN5LWD7UTji2Fqw5V2YLjBpHEoU9Xl/eUWNpDeZvoyOv2w=="
   "resolved" "https://registry.npmjs.org/dom-walk/-/dom-walk-0.1.2.tgz"
   "version" "0.1.2"
+
+"dtrace-provider@~0.8":
+  "integrity" "sha1-KZbVSQw34TR74mO0I+17KX+w2X4="
+  "resolved" "https://registry.npm.taobao.org/dtrace-provider/download/dtrace-provider-0.8.8.tgz"
+  "version" "0.8.8"
+  dependencies:
+    "nan" "^2.14.0"
 
 "duplexer3@^0.1.4":
   "integrity" "sha1-7gHdHKwO08vH/b6jfcCo8c4ALOI="
@@ -981,6 +1028,11 @@
   "integrity" "sha1-Aljq5NPQwJdN4cFpGI7wBR0dGYg="
   "resolved" "https://registry.npmjs.org/escape-html/-/escape-html-1.0.3.tgz"
   "version" "1.0.3"
+
+"esprima@4.0.1":
+  "integrity" "sha1-E7BM2z5sXRnfkatph6hpVhmwqnE="
+  "resolved" "https://registry.npm.taobao.org/esprima/download/esprima-4.0.1.tgz"
+  "version" "4.0.1"
 
 "etag@~1.8.1":
   "integrity" "sha1-Qa4u62XvpiJorr/qg6x9eSmbCIc="
@@ -1285,7 +1337,14 @@
   dependencies:
     "assert-plus" "^1.0.0"
 
-"glob@^7.1.3":
+"glob-promise@^3.4.0":
+  "integrity" "sha1-trjwhFBCFvcC3CzoybyayIZv2yA="
+  "resolved" "https://registry.npmmirror.com/glob-promise/download/glob-promise-3.4.0.tgz"
+  "version" "3.4.0"
+  dependencies:
+    "@types/glob" "*"
+
+"glob@*", "glob@^7.1.3":
   "integrity" "sha512-lmLf6gtyrPq8tTjSmrO94wBeQbFR3HbLHbuyD69wuyQkImp2hWqMGB47OX65FBkPffO641IP9jWa1z4ivqG26Q=="
   "resolved" "https://registry.npmjs.org/glob/-/glob-7.2.0.tgz"
   "version" "7.2.0"
@@ -1294,6 +1353,17 @@
     "inflight" "^1.0.4"
     "inherits" "2"
     "minimatch" "^3.0.4"
+    "once" "^1.3.0"
+    "path-is-absolute" "^1.0.0"
+
+"glob@^6.0.1":
+  "integrity" "sha512-MKZeRNyYZAVVVG1oZeLaWie1uweH40m9AZwIwxyPbTSX4hHrVYSzLg0Ro5Z5R7XKkIX+Cc6oD1rqeDJnwsB8/A=="
+  "resolved" "https://registry.npmmirror.com/glob/download/glob-6.0.4.tgz"
+  "version" "6.0.4"
+  dependencies:
+    "inflight" "^1.0.4"
+    "inherits" "2"
+    "minimatch" "2 || 3"
     "once" "^1.3.0"
     "path-is-absolute" "^1.0.0"
 
@@ -1852,7 +1922,7 @@
   "resolved" "https://registry.npmjs.org/minimalistic-crypto-utils/-/minimalistic-crypto-utils-1.0.1.tgz"
   "version" "1.0.1"
 
-"minimatch@^3.0.4":
+"minimatch@^3.0.4", "minimatch@2 || 3":
   "integrity" "sha512-yJHVQEhyqPLUTgt9B83PXu6W3rx4MvvHvSUvToogpwoGDOUQ+yDrR0HRot+yOCdCO7u4hX3pWft6kWBBcqh0UA=="
   "resolved" "https://registry.npmjs.org/minimatch/-/minimatch-3.0.4.tgz"
   "version" "3.0.4"
@@ -1898,10 +1968,22 @@
   dependencies:
     "minimist" "^1.2.5"
 
+"mkdirp@~0.5.1":
+  "integrity" "sha1-2Rzv1i0UNsoPQWIOJRKI1CAJne8="
+  "resolved" "https://registry.npmmirror.com/mkdirp/download/mkdirp-0.5.5.tgz"
+  "version" "0.5.5"
+  dependencies:
+    "minimist" "^1.2.5"
+
 "mock-fs@^4.1.0":
   "integrity" "sha512-qYvlv/exQ4+svI3UOvPUpLDF0OMX5euvUH0Ny4N5QyRyhNdgAgUrVH3iUINSzEPLvx0kbo/Bp28GJKIqvE7URw=="
   "resolved" "https://registry.npmjs.org/mock-fs/-/mock-fs-4.14.0.tgz"
   "version" "4.14.0"
+
+"moment@^2.19.3":
+  "integrity" "sha512-kHmoybcPV8Sqy59DwNDY3Jefr64lK/by/da0ViFcuA4DH0vQg5Q6Ze5VimxkfQNSC+Mls/Kx53s7TjP1RhFEDQ=="
+  "resolved" "https://registry.npmmirror.com/moment/download/moment-2.29.1.tgz"
+  "version" "2.29.1"
 
 "ms@2.0.0":
   "integrity" "sha1-VgiurfwAvmwpAd9fmGF4jeDVl8g="
@@ -1953,10 +2035,29 @@
     "multibase" "^0.7.0"
     "varint" "^5.0.0"
 
+"mv@~2":
+  "integrity" "sha1-rmzg1vbV4KT32JN5jQPB6pVZtqI="
+  "resolved" "https://registry.npm.taobao.org/mv/download/mv-2.1.1.tgz"
+  "version" "2.1.1"
+  dependencies:
+    "mkdirp" "~0.5.1"
+    "ncp" "~2.0.0"
+    "rimraf" "~2.4.0"
+
+"nan@^2.14.0":
+  "integrity" "sha1-PzSkc/8Y4VwbVia2KQO1rW5mX+4="
+  "resolved" "https://registry.nlark.com/nan/download/nan-2.15.0.tgz"
+  "version" "2.15.0"
+
 "nano-json-stream-parser@^0.1.2":
   "integrity" "sha1-DMj20OK2IrR5xA1JnEbWS3Vcb18="
   "resolved" "https://registry.npmjs.org/nano-json-stream-parser/-/nano-json-stream-parser-0.1.2.tgz"
   "version" "0.1.2"
+
+"ncp@~2.0.0":
+  "integrity" "sha1-GVoh1sRuNh0vsSgbo4uR6d9727M="
+  "resolved" "https://registry.npm.taobao.org/ncp/download/ncp-2.0.0.tgz"
+  "version" "2.0.0"
 
 "negotiator@0.6.2":
   "integrity" "sha512-hZXc7K2e+PgeI1eDBe/10Ard4ekbfrrqG8Ep+8Jmf4JID2bNg7NvCPOZN+kfF574pFQI7mum2AUqDidoKqcTOw=="
@@ -2309,6 +2410,13 @@
   dependencies:
     "glob" "^7.1.3"
 
+"rimraf@~2.4.0":
+  "integrity" "sha1-7nEM5dk6j9uFb7Xqj/Di11k0sto="
+  "resolved" "https://registry.npmmirror.com/rimraf/download/rimraf-2.4.5.tgz"
+  "version" "2.4.5"
+  dependencies:
+    "glob" "^6.0.1"
+
 "ripemd160@^2.0.0", "ripemd160@^2.0.1":
   "integrity" "sha512-ii4iagi25WusVoiC4B4lq7pbXfAp3D9v5CwfkY33vffw2+pkDjY1D8GaN7spsxvCSx8dkPqOZCEZyfxcmJG2IA=="
   "resolved" "https://registry.npmjs.org/ripemd160/-/ripemd160-2.0.2.tgz"
@@ -2338,6 +2446,11 @@
   "integrity" "sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g=="
   "resolved" "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.1.2.tgz"
   "version" "5.1.2"
+
+"safe-json-stringify@~1":
+  "integrity" "sha1-NW5EvJjx+TzkXfFLzXwBzahuCv0="
+  "resolved" "https://registry.npm.taobao.org/safe-json-stringify/download/safe-json-stringify-1.2.0.tgz"
+  "version" "1.2.0"
 
 "safer-buffer@^2.0.2", "safer-buffer@^2.1.0", "safer-buffer@>= 2.1.2 < 3", "safer-buffer@~2.1.0":
   "integrity" "sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg=="

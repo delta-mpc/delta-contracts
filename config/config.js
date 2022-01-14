@@ -14,6 +14,10 @@ const conf = {
       //       privateKey: '4c37340e31bd665979a875a211ad47905c041b3b821b67e7d416bd97fc58a8e6',
       //   }
       {
+        address: "0xcae73102154059DF0cdb628413A866b15cE81cd9",
+        privateKey: "1c86b422d4a23bffc9107c6818e2566395f4a8802e93a175049e6307b12c9d51"
+      },
+      {
          address:'0x4CeDC9148aA38cc9636ddEC16a7a0bDC3c0c756F',
          privateKey:"18755a8c9ecf090505333ea5ff5a065415bbd312ed3eb8bca571892f212eab9c"
       },

@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./Identity.sol";
+import "./IdentityContract.sol";
 
 /**
  * @title Delta Contract
@@ -35,6 +35,7 @@ contract HFLContract {
         bytes32 commitment;
         string taskType;
         uint64 currentRound;
+        bool finished;
     }
 
     struct Candidate {
@@ -77,6 +78,8 @@ contract HFLContract {
         bytes32 commitment,
         string taskType
     );
+    // triggered when task finished
+    event TaskFinished(bytes32 taskId);
     // triggered when task developer call startRound
     event RoundStart(bytes32 taskId, uint64 round);
 
@@ -184,7 +187,8 @@ contract HFLContract {
             dataSet: dataSet,
             commitment: commitment,
             taskType: taskType,
-            currentRound: 0
+            currentRound: 0,
+            finished: false
         });
         taskId = task_id;
         TaskRound[] storage rounds = taskRounds[taskId];
@@ -197,6 +201,25 @@ contract HFLContract {
             commitment,
             taskType
         );
+    }
+
+    function finishTask(bytes32 taskId)
+        public
+        taskExists(taskId)
+        taskOwner(taskId)
+    {
+        Task storage task = createdTasks[taskId];
+        task.finished = true;
+        emit TaskFinished(taskId);
+    }
+
+    function getTask(bytes32 taskId)
+        public
+        view
+        taskExists(taskId)
+        returns (Task memory task)
+    {
+        task = createdTasks[taskId];
     }
 
     /**
