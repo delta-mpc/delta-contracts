@@ -2,11 +2,11 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./Identity.sol";
+import "./IdentityContract.sol";
 
 /**
- * @title Horizontal Federated Learning Task Contract
- * @dev Horizontal Federated Learning Task Contract
+ * @title Delta Contract
+ * @dev Delta Contract For Mpc
  */
 contract HFLContract {
     IdentityContract public idContract;
@@ -33,7 +33,9 @@ contract HFLContract {
         string creatorUrl;
         string dataSet;
         bytes32 commitment;
+        string taskType;
         uint64 currentRound;
+        bool finished;
     }
 
     struct Candidate {
@@ -73,8 +75,11 @@ contract HFLContract {
         bytes32 taskId,
         string dataSet,
         string creatorUrl,
-        bytes32 commitment
+        bytes32 commitment,
+        string taskType
     );
+    // triggered when task finished
+    event TaskFinished(bytes32 taskId);
     // triggered when task developer call startRound
     event RoundStart(bytes32 taskId, uint64 round);
 
@@ -94,8 +99,8 @@ contract HFLContract {
     event ContentUploaded(
         bytes32 taskId,
         uint64 round,
-        address owner,
-        address sharer,
+        address sender,
+        address reciver,
         string contentType,
         bytes content
     );
@@ -169,10 +174,11 @@ contract HFLContract {
      */
     function createTask(
         string calldata dataSet,
-        bytes32 commitment
+        bytes32 commitment,
+        string calldata taskType
     ) public payable returns (bytes32 taskId) {
         bytes32 task_id = keccak256(
-            abi.encode(block.timestamp, msg.sender, dataSet, commitment)
+            abi.encode(block.number, msg.sender, dataSet, commitment, taskType)
         );
         IdentityContract.Node memory node = idContract.getNodeInfo(msg.sender);
         createdTasks[task_id] = Task({
@@ -180,12 +186,40 @@ contract HFLContract {
             creator: msg.sender,
             dataSet: dataSet,
             commitment: commitment,
-            currentRound: 0
+            taskType: taskType,
+            currentRound: 0,
+            finished: false
         });
         taskId = task_id;
         TaskRound[] storage rounds = taskRounds[taskId];
         rounds.push();
-        emit TaskCreated(msg.sender, task_id, dataSet, node.url, commitment);
+        emit TaskCreated(
+            msg.sender,
+            task_id,
+            dataSet,
+            node.url,
+            commitment,
+            taskType
+        );
+    }
+
+    function finishTask(bytes32 taskId)
+        public
+        taskExists(taskId)
+        taskOwner(taskId)
+    {
+        Task storage task = createdTasks[taskId];
+        task.finished = true;
+        emit TaskFinished(taskId);
+    }
+
+    function getTask(bytes32 taskId)
+        public
+        view
+        taskExists(taskId)
+        returns (Task memory task)
+    {
+        task = createdTasks[taskId];
     }
 
     /**
@@ -256,14 +290,15 @@ contract HFLContract {
     function getClientPublickeys(
         bytes32 taskId,
         uint64 round,
-        address candidateAddr
-    )
-        public
-        view
-        roundExists(taskId, round)
-        returns (Candidate memory candidate)
-    {
-        candidate = taskRounds[taskId][round].candidates[candidateAddr];
+        address[] calldata candidateAddrs
+    ) public view roundExists(taskId, round) returns (Candidate[] memory) {
+        Candidate[] memory candidates = new Candidate[](candidateAddrs.length);
+        for (uint256 i = 0; i < candidateAddrs.length; i++) {
+            candidates[i] = taskRounds[taskId][round].candidates[
+                candidateAddrs[i]
+            ];
+        }
+        return candidates;
     }
 
     /**
@@ -338,22 +373,26 @@ contract HFLContract {
     /**
      * @dev called by any participants
      */
-    function getSecretSharingData(
+    function getSecretSharingDatas(
         bytes32 taskId,
         uint64 round,
-        address sender,
+        address[] calldata senders,
         address receiver
     )
         public
         view
         roundExists(taskId, round)
         roundcmmtExists(taskId, round)
-        returns (SSData memory ssdata)
+        returns (SSData[] memory)
     {
         RoundModelCommitments[] storage cmmts = roundModelCommitments[taskId];
         require(cmmts.length >= round, "The Task Round Must exists");
         RoundModelCommitments storage cmmt = cmmts[round];
-        ssdata = cmmt.ssdata[sender][receiver];
+        SSData[] memory ssdatas = new SSData[](senders.length);
+        for (uint256 i = 0; i < senders.length; i++) {
+            ssdatas[i] = (cmmt.ssdata[senders[i]][receiver]);
+        }
+        return ssdatas;
     }
 
     /**
@@ -461,20 +500,26 @@ contract HFLContract {
      * @dev called by client, upload secret sharing seed commitment
      * @param taskId taskId
      * @param round the task round
-     * @param sharee the sharee address
-     * @param seedCommitment secret sharing piece of seed mask
+     * @param receivers the receiver addresses
+     * @param seedCommitments seedCommitments[i] is the commitment send to receivers[i]
      */
     function uploadSeedCommitment(
         bytes32 taskId,
         uint64 round,
-        address sharee,
-        bytes calldata seedCommitment
+        address[] calldata receivers,
+        bytes[] calldata seedCommitments
     ) public roundExists(taskId, round) {
         require(
-            seedCommitment.length > 0 &&
-                seedCommitment.length <= maxSSComitmentLength,
-            "commitment length exceeds limit or it is empty"
+            receivers.length == seedCommitments.length,
+            "receivers length is not equal to seedCommitments length"
         );
+        for (uint256 i = 0; i < seedCommitments.length; i++) {
+            require(
+                seedCommitments[i].length > 0 &&
+                    seedCommitments[i].length <= maxSSComitmentLength,
+                "commitment length exceeds limit or it is empty"
+            );
+        }
         TaskRound storage curRound = taskRounds[taskId][round];
         require(
             curRound.status == RoundStatus.Running,
@@ -484,38 +529,52 @@ contract HFLContract {
             taskId
         ];
         RoundModelCommitments storage commitment = commitments[round];
-        require(
-            commitment.ssdata[msg.sender][sharee].seedCommitment.length == 0,
-            "cannot upload seed cmmt multiple times"
-        );
-        commitment.ssdata[msg.sender][sharee].seedCommitment = seedCommitment;
-        emit ContentUploaded(
-            taskId,
-            round,
-            msg.sender,
-            sharee,
-            "SEEDCMMT",
-            seedCommitment
-        );
+        for (uint256 i = 0; i < seedCommitments.length; i++) {
+            require(
+                commitment
+                    .ssdata[msg.sender][receivers[i]]
+                    .seedCommitment
+                    .length == 0,
+                "cannot upload seed cmmt multiple times"
+            );
+            commitment
+            .ssdata[msg.sender][receivers[i]].seedCommitment = seedCommitments[
+                i
+            ];
+            emit ContentUploaded(
+                taskId,
+                round,
+                msg.sender,
+                receivers[i],
+                "SEEDCMMT",
+                seedCommitments[i]
+            );
+        }
     }
 
     /**
      * @dev called by client, upload secret sharing seed commitment
      * @param taskId taskId
      * @param round the task round
-     * @param sharee the sharee address
-     * @param seed the seed piece
+     * @param senders senders address
+     * @param seeds seeds[i] is the seed send by senders[i]
      */
     function uploadSeed(
         bytes32 taskId,
         uint64 round,
-        address sharee,
-        bytes calldata seed
+        address[] calldata senders,
+        bytes[] calldata seeds
     ) public roundExists(taskId, round) {
         require(
-            seed.length > 0 && seed.length <= maxSSComitmentLength,
-            "commitment length exceeds limit or it is empty"
+            senders.length == seeds.length,
+            "senders length is not equal to seeds length"
         );
+        for (uint256 i = 0; i < seeds.length; i++) {
+            require(
+                seeds[i].length > 0 && seeds[i].length <= maxSSComitmentLength,
+                "commitment length exceeds limit or it is empty"
+            );
+        }
         TaskRound storage curRound = taskRounds[taskId][round];
         require(
             curRound.status == RoundStatus.Aggregating,
@@ -525,36 +584,54 @@ contract HFLContract {
             taskId
         ];
         RoundModelCommitments storage commitment = commitments[round];
-        require(
-            commitment.ssdata[msg.sender][sharee].seedCommitment.length > 0,
-            "must upload commitment first"
-        );
-        require(
-            commitment.ssdata[msg.sender][sharee].seedPiece.length == 0,
-            "cannot upload seed multiple times"
-        );
-        commitment.ssdata[msg.sender][sharee].seedPiece = seed;
-        emit ContentUploaded(taskId, round, msg.sender, sharee, "SEED", seed);
+        for (uint256 i = 0; i < seeds.length; i++) {
+            require(
+                commitment
+                    .ssdata[senders[i]][msg.sender]
+                    .seedCommitment
+                    .length > 0,
+                "must upload commitment first"
+            );
+            require(
+                commitment.ssdata[senders[i]][msg.sender].seedPiece.length == 0,
+                "cannot upload seed multiple times"
+            );
+            commitment.ssdata[senders[i]][msg.sender].seedPiece = seeds[i];
+            emit ContentUploaded(
+                taskId,
+                round,
+                senders[i],
+                msg.sender,
+                "SEED",
+                seeds[i]
+            );
+        }
     }
 
     /**
      * @dev called by client, upload secret sharing sk commitment
      * @param taskId taskId
      * @param round the task round
-     * @param sharee the sharee address
-     * @param secretKeyCommitment secret sharing piece of seed mask
+     * @param receivers the receiver addresses
+     * @param secretKeyCommitments secretKeyCommitments[i] is the commitment send to receivers[i]
      */
     function uploadSecretKeyCommitment(
         bytes32 taskId,
         uint64 round,
-        address sharee,
-        bytes calldata secretKeyCommitment
+        address[] calldata receivers,
+        bytes[] calldata secretKeyCommitments
     ) public roundExists(taskId, round) {
         require(
-            secretKeyCommitment.length > 0 &&
-                secretKeyCommitment.length <= maxSSComitmentLength,
-            "commitment length exceeds limit or it is empty"
+            receivers.length == secretKeyCommitments.length,
+            "receivers length is not equal to secretKeyCommitments length"
         );
+        for (uint256 i = 0; i < secretKeyCommitments.length; i++) {
+            require(
+                secretKeyCommitments[i].length > 0 &&
+                    secretKeyCommitments[i].length <= maxSSComitmentLength,
+                "commitment length exceeds limit or it is empty"
+            );
+        }
         TaskRound storage curRound = taskRounds[taskId][round];
         require(
             curRound.status == RoundStatus.Running,
@@ -563,49 +640,53 @@ contract HFLContract {
         RoundModelCommitments[] storage commitments = roundModelCommitments[
             taskId
         ];
-        if (commitments.length == round) {
-            commitments.push();
-        }
         RoundModelCommitments storage commitment = commitments[round];
-        require(
+        for (uint256 i = 0; i < secretKeyCommitments.length; i++) {
+            require(
+                commitment
+                    .ssdata[msg.sender][receivers[i]]
+                    .secretKeyMaskCommitment
+                    .length == 0,
+                "cannot upload seed cmmt multiple times"
+            );
             commitment
-                .ssdata[msg.sender][sharee]
-                .secretKeyMaskCommitment
-                .length == 0,
-            "cannot upload seed multiple times"
-        );
-        commitment
-        .ssdata[msg.sender][sharee]
-            .secretKeyMaskCommitment = secretKeyCommitment;
-        emit ContentUploaded(
-            taskId,
-            round,
-            msg.sender,
-            sharee,
-            "SKMASKCMMT",
-            secretKeyCommitment
-        );
-        // commitment.data[msg.sender].seedCmmtmnt = seedCmmtmnt;
+            .ssdata[msg.sender][receivers[i]]
+                .secretKeyMaskCommitment = secretKeyCommitments[i];
+            emit ContentUploaded(
+                taskId,
+                round,
+                msg.sender,
+                receivers[i],
+                "SKMASKCMMT",
+                secretKeyCommitments[i]
+            );
+        }
     }
 
     /**
      * @dev called by client, upload secret sharing sk commitment
      * @param taskId taskId
      * @param round the task round
-     * @param secretkeyMask the crypted skmask
-     * @param sender the sender address
+     * @param senders senders address
+     * @param secretkeyMasks secretkeyMasks[i] is the secretKeyMask send by senders[i]
      */
     function uploadSecretkeyMask(
         bytes32 taskId,
         uint64 round,
-        address sender,
-        bytes calldata secretkeyMask
+        address[] calldata senders,
+        bytes[] calldata secretkeyMasks
     ) public roundExists(taskId, round) {
         require(
-            secretkeyMask.length > 0 &&
-                secretkeyMask.length <= maxSSComitmentLength,
-            "commitment length exceeds limit or it is empty"
+            senders.length == secretkeyMasks.length,
+            "senders length is not equal to secretkeyMasks length"
         );
+        for (uint256 i = 0; i < secretkeyMasks.length; i++) {
+            require(
+                secretkeyMasks[i].length > 0 &&
+                    secretkeyMasks[i].length <= maxSSComitmentLength,
+                "commitment length exceeds limit or it is empty"
+            );
+        }
         TaskRound storage curRound = taskRounds[taskId][round];
         require(
             curRound.status == RoundStatus.Aggregating,
@@ -614,31 +695,33 @@ contract HFLContract {
         RoundModelCommitments[] storage commitments = roundModelCommitments[
             taskId
         ];
-        if (commitments.length == round) {
-            commitments.push();
-        }
         RoundModelCommitments storage commitment = commitments[round];
-        require(
+        for (uint256 i = 0; i < secretkeyMasks.length; i++) {
+            require(
+                commitment
+                    .ssdata[senders[i]][msg.sender]
+                    .secretKeyMaskCommitment
+                    .length > 0,
+                "must upload commitment first"
+            );
+            require(
+                commitment
+                    .ssdata[senders[i]][msg.sender]
+                    .secretKeyPiece
+                    .length == 0,
+                "cannot upload seed multiple times"
+            );
             commitment
-                .ssdata[sender][msg.sender]
-                .secretKeyMaskCommitment
-                .length > 0,
-            "must upload commitment first"
-        );
-        require(
-            commitment.ssdata[sender][msg.sender].secretKeyPiece.length == 0,
-            "cannot upload skmask multiple times"
-        );
-        commitment.ssdata[sender][msg.sender].secretKeyPiece = secretkeyMask;
-        emit ContentUploaded(
-            taskId,
-            round,
-            sender,
-            msg.sender,
-            "SKMASK",
-            secretkeyMask
-        );
-        // commitment.data[msg.sender].seedCmmtmnt = seedCmmtmnt;
+            .ssdata[senders[i]][msg.sender].secretKeyPiece = secretkeyMasks[i];
+            emit ContentUploaded(
+                taskId,
+                round,
+                senders[i],
+                msg.sender,
+                "SKMASK",
+                secretkeyMasks[i]
+            );
+        }
     }
 
     function setMaxWeightCommitmentLength(uint64 maxLength) public isOwner {
