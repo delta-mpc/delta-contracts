@@ -1,6 +1,6 @@
 {
   "name": "nightfall-contracts",
-  "type": "module",
+  "type": "commonjs",
   "version": "1.0.0",
   "description": "Contracts for an Nightfall project.",
   "main": "main.js",
