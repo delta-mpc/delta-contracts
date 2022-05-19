@@ -1,6 +1,12 @@
-FROM node:14.15.4-alpine
+FROM node:16
+
 WORKDIR /app
-COPY . .
-RUN yarn
-ENTRYPOINT ["npm", "run"]
-CMD ["server"]
+
+COPY contracts /app/
+COPY migrations /app/
+COPY truffle-config.js /app/
+
+RUN npm install -g truffle && truffle compile
+
+ENTRYPOINT [ "truffle" ]
+CMD [ "migrate" ]
