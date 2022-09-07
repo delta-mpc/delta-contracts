@@ -18,7 +18,7 @@ function Connect() {
         };
       //   HTTP://127.0.0.1:7545
       //   conf.web3ProviderURL
-        let provider = new Web3.providers.WebsocketProvider("wss://node.delta.yuanben.org", options);
+        let provider = new Web3.providers.WebsocketProvider(conf.web3ProviderURL, options);
         provider.on('error', (e) => {
             console.error(e.reason)
         });
