@@ -427,8 +427,8 @@ contract HLR {
      */
     function getResultCommitment(
         bytes32 taskId,
-        address clientaddress,
-        uint64 round
+        uint64 round,
+        address clientaddress
     )
         public
         view
