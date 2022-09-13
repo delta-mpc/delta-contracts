@@ -259,6 +259,7 @@ contract HLR {
                 state.unfinishedClients[finalRound.finishedAddrs[i]] = true;
             }
             state.unfinishedCount = finalRound.finishedAddrs.length;
+            state.valid = true;
         }
         emit TaskFinished(taskId);
     }
@@ -805,9 +806,24 @@ contract HLR {
         bytes memory proof,
         uint256[] memory pubSignals
     ) public taskExists(taskId) returns (bool) {
+        Task storage task = createdTasks[taskId];
+        require(task.finished);
+        VerifierState storage state = verifierStates[taskId];
+        require(state.valid);
+        require(state.unfinishedClients[msg.sender]);
+        state.unfinishedClients[msg.sender] = false;
+        state.unfinishedCount--;
+
         Verifier v = Verifier(verifierAddr);
-        bool valid = v.verifyProof(proof, pubSignals);
-        if (!valid) {
+        try v.verifyProof(proof, pubSignals) returns (bool valid) {
+            if (!valid) {
+                state.valid = false;
+                emit TaskMemberVerified(taskId, msg.sender, false);
+                emit TaskVerified(taskId, false);
+                return false;
+            }
+        } catch {
+            state.valid = false;
             emit TaskMemberVerified(taskId, msg.sender, false);
             emit TaskVerified(taskId, false);
             return false;
@@ -816,15 +832,7 @@ contract HLR {
         bytes32 weightCommitment = bytes32(pubSignals[pubSignals.length - 2]);
         bytes32 dataCommitment = bytes32(pubSignals[pubSignals.length - 1]);
 
-        Task storage task = createdTasks[taskId];
-        require(task.finished);
         // check gradient norm
-        VerifierState storage state = verifierStates[taskId];
-        require(state.valid);
-        require(state.unfinishedClients[msg.sender]);
-        state.unfinishedClients[msg.sender] = true;
-        state.unfinishedCount--;
-
         for (uint256 i = 0; i < pubSignals.length - 2; i++) {
             if (i % 2 == 0) {
                 state.gradients.push(pubSignals[i]);
@@ -868,10 +876,17 @@ contract HLR {
             return false;
         }
         // check data commitment
-        if (
-            dataCommitment !=
-            dataContract.getDataCommitment(msg.sender, task.dataSet)
+
+        try dataContract.getDataCommitment(msg.sender, task.dataSet) returns (
+            bytes32 trueDataCommitment
         ) {
+            if (dataCommitment != trueDataCommitment) {
+                state.valid = false;
+                emit TaskMemberVerified(taskId, msg.sender, false);
+                emit TaskVerified(taskId, false);
+                return false;
+            }
+        } catch {
             state.valid = false;
             emit TaskMemberVerified(taskId, msg.sender, false);
             emit TaskVerified(taskId, false);
