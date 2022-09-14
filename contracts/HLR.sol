@@ -88,8 +88,16 @@ contract HLR {
     struct VerifierState {
         uint256[] gradients;
         uint256 precision;
+        address[] clients;
+        address[] invalidClients;
         mapping(address => bool) unfinishedClients;
         uint256 unfinishedCount;
+        bool valid;
+    }
+
+    struct ExtCallVerifierState {
+        address[] unfinishedClients;
+        address[] invalidClients;
         bool valid;
     }
 
@@ -257,6 +265,7 @@ contract HLR {
             VerifierState storage state = verifierStates[taskId];
             for (uint256 i = 0; i < finalRound.finishedAddrs.length; i++) {
                 state.unfinishedClients[finalRound.finishedAddrs[i]] = true;
+                state.clients.push(finalRound.finishedAddrs[i]);
             }
             state.unfinishedCount = finalRound.finishedAddrs.length;
             state.valid = true;
@@ -811,6 +820,7 @@ contract HLR {
         VerifierState storage state = verifierStates[taskId];
         require(state.valid);
         require(state.unfinishedClients[msg.sender]);
+        require(state.unfinishedCount > 0);
         state.unfinishedClients[msg.sender] = false;
         state.unfinishedCount--;
 
@@ -818,12 +828,14 @@ contract HLR {
         try v.verifyProof(proof, pubSignals) returns (bool valid) {
             if (!valid) {
                 state.valid = false;
+                state.invalidClients.push(msg.sender);
                 emit TaskMemberVerified(taskId, msg.sender, false);
                 emit TaskVerified(taskId, false);
                 return false;
             }
         } catch {
             state.valid = false;
+            state.invalidClients.push(msg.sender);
             emit TaskMemberVerified(taskId, msg.sender, false);
             emit TaskVerified(taskId, false);
             return false;
@@ -859,6 +871,7 @@ contract HLR {
             }
             if (minGradient >= 10**(state.precision - task.tolerance)) {
                 state.valid = false;
+                state.invalidClients.push(msg.sender);
                 emit TaskMemberVerified(taskId, msg.sender, false);
                 emit TaskVerified(taskId, false);
                 return false;
@@ -871,6 +884,7 @@ contract HLR {
         RoundModelCommitments storage cmmt = cmmts[task.currentRound];
         if (cmmt.weightCommitment != weightCommitment) {
             state.valid = false;
+            state.invalidClients.push(msg.sender);
             emit TaskMemberVerified(taskId, msg.sender, false);
             emit TaskVerified(taskId, false);
             return false;
@@ -882,12 +896,14 @@ contract HLR {
         ) {
             if (dataCommitment != trueDataCommitment) {
                 state.valid = false;
+                state.invalidClients.push(msg.sender);
                 emit TaskMemberVerified(taskId, msg.sender, false);
                 emit TaskVerified(taskId, false);
                 return false;
             }
         } catch {
             state.valid = false;
+            state.invalidClients.push(msg.sender);
             emit TaskMemberVerified(taskId, msg.sender, false);
             emit TaskVerified(taskId, false);
             return false;
@@ -899,6 +915,34 @@ contract HLR {
         }
 
         return true;
+    }
+
+    function getVerifierState(bytes32 taskId)
+        public
+        view
+        taskExists(taskId)
+        returns (ExtCallVerifierState memory)
+    {
+        VerifierState storage state = verifierStates[taskId];
+        address[] memory unfinishedClients = new address[](
+            state.unfinishedCount
+        );
+        if (state.unfinishedCount > 0) {
+            uint256 idx = 0;
+            for (uint256 i = 0; i < state.clients.length; i++) {
+                address client = state.clients[i];
+                if (state.unfinishedClients[client]) {
+                    unfinishedClients[idx] = client;
+                    idx++;
+                }
+            }
+        }
+        return
+            ExtCallVerifierState({
+                unfinishedClients: unfinishedClients,
+                invalidClients: state.invalidClients,
+                valid: state.valid
+            });
     }
 
     function setMaxWeightCommitmentLength(uint64 maxLength) public isOwner {
