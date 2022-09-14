@@ -11,7 +11,6 @@ const assert = chai.assert
 contract("hlr", (accounts) => {
     const dataset = "mnist"
     const taskCommitment = "0x1230000000000000000000000000000000000000000000000000000000000000"
-    const taskType = "hlr"
     const enableVerify = true;
     const tolerance = 6;
 
@@ -43,7 +42,7 @@ contract("hlr", (accounts) => {
 
     it("create task", async () => {
         const hlrInstance = await hlr.deployed()
-        const receipt = await hlrInstance.createTask(dataset, taskCommitment, taskType, enableVerify, tolerance, { from: node1 })
+        const receipt = await hlrInstance.createTask(dataset, taskCommitment, enableVerify, tolerance, { from: node1 })
 
         const creator = receipt.logs[0].args['0']
         taskId = receipt.logs[0].args['1']
@@ -56,7 +55,7 @@ contract("hlr", (accounts) => {
         assert.strictEqual(creator, node1)
         assert.strictEqual(_dataset, dataset)
         assert.strictEqual(_taskCommitment, taskCommitment)
-        assert.strictEqual(_taskType, taskType)
+        assert.strictEqual(_taskType, "hlr")
         assert.strictEqual(_enableVerify, enableVerify)
         assert.strictEqual(_tolerance, tolerance)
     })
@@ -69,7 +68,7 @@ contract("hlr", (accounts) => {
         assert.strictEqual(task.creatorUrl, "http://node1")
         assert.strictEqual(task.dataSet, dataset)
         assert.strictEqual(task.commitment, taskCommitment)
-        assert.strictEqual(task.taskType, taskType)
+        assert.strictEqual(task.taskType, "hlr")
         assert.strictEqual(Number(task.currentRound), 0)
         assert.isNotTrue(task.finished)
         assert.strictEqual(task.enableVerify, enableVerify)
@@ -276,7 +275,6 @@ async function runTask(nodes) {
 
     const dataset = "mnist"
     const taskCommitment = "0x1230000000000000000000000000000000000000000000000000000000000000"
-    const taskType = "hlr"
     const enableVerify = true;
     const tolerance = 6;
 
@@ -292,7 +290,7 @@ async function runTask(nodes) {
     await datahubInstance.register(dataset, "0x2be97c3a6dff81e5db01463a44e2057d77cabb72c17510b523c759d237601940", { from: node2 })
     await datahubInstance.register(dataset, "0x241074e8fd5a7b5b87c23b76a2ab58b48054d84971a204b6d3ca02b87475cec9", { from: node3 })
     // create task
-    const r1 = await hlrInstance.createTask(dataset, taskCommitment, taskType, enableVerify, tolerance, { from: node1 })
+    const r1 = await hlrInstance.createTask(dataset, taskCommitment, enableVerify, tolerance, { from: node1 })
     const taskId = r1.logs[0].args[1]
     // start round
     const weightCommitment = "0x111da4b536325aca16982ce6fbcb52c06e6708b4976e0b0dbddb022776ff9ffc"

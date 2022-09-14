@@ -209,10 +209,10 @@ contract HLR {
     function createTask(
         string calldata dataSet,
         bytes32 commitment,
-        string calldata taskType,
         bool enableVerify,
         uint256 tolerance
     ) public payable returns (bytes32 taskId) {
+        string memory taskType = "hlr";
         bytes32 task_id = keccak256(
             abi.encode(block.number, msg.sender, dataSet, commitment, taskType)
         );
