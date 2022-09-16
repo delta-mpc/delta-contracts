@@ -847,7 +847,12 @@ contract HLR {
         // check gradient norm
         for (uint256 i = 0; i < pubSignals.length - 2; i++) {
             if (i % 2 == 0) {
-                state.gradients.push(pubSignals[i]);
+                uint256 idx = i / 2;
+                if (state.gradients.length < idx + 1) {
+                    state.gradients.push(pubSignals[i]);
+                } else {
+                    state.gradients[idx] += pubSignals[i];
+                }
             } else {
                 if (state.precision == 0) {
                     state.precision = pubSignals[i];
