@@ -6,17 +6,13 @@ contract DataHub {
     address private owner;
     event OwnerSet(address indexed oldOwner, address indexed newOwner);
 
-    struct DataRecord {
-        bytes32 commitment;
-        uint32 version;
-    }
-    mapping(address => mapping(string => DataRecord)) datahub;
+    mapping(address => mapping(string => bytes32[])) datahub;
 
     event DataRegistered(
         address indexed owner,
         string name,
-        bytes32 commitment,
-        uint32 version
+        uint256 index,
+        bytes32 commitment
     );
 
     constructor() {
@@ -24,38 +20,42 @@ contract DataHub {
         emit OwnerSet(address(0), owner);
     }
 
-    function register(string calldata name, bytes32 commitment) public {
-        datahub[msg.sender][name].commitment = commitment;
-        datahub[msg.sender][name].version += 1;
+    function register(
+        string calldata name,
+        uint256 index,
+        bytes32 commitment
+    ) public {
+        if (index == datahub[msg.sender][name].length) {
+            datahub[msg.sender][name].push(commitment);
+        } else if (index == datahub[msg.sender][name].length - 1) {
+            datahub[msg.sender][name][index] = commitment;
+        } else {
+            revert("You cannot update other data blocks except the last block");
+        }
 
         emit DataRegistered(
             msg.sender,
             name,
-            commitment,
-            datahub[msg.sender][name].version
+            index,
+            commitment
         );
     }
 
-    modifier dataExists(address addr, string calldata name) {
-        require(datahub[addr][name].version > 0);
+    modifier dataExists(
+        address addr,
+        string calldata name,
+        uint256 index
+    ) {
+        require(index < datahub[addr][name].length);
         _;
     }
 
-    function getDataCommitment(address addr, string calldata name)
-        public
-        view
-        dataExists(addr, name)
-        returns (bytes32 commitment)
-    {
-        commitment = datahub[addr][name].commitment;
+    function getDataCommitment(
+        address addr,
+        string calldata name,
+        uint256 index
+    ) public view dataExists(addr, name, index) returns (bytes32 commitment) {
+        commitment = datahub[addr][name][index];
     }
 
-    function getDataVersion(address addr, string calldata name)
-        public
-        view
-        dataExists(addr, name)
-        returns (uint32 version)
-    {
-        version = datahub[addr][name].version;
-    }
 }
