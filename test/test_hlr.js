@@ -28,9 +28,9 @@ contract("hlr", (accounts) => {
         await idInstance.join("http://node3", "node3", { from: node3 })
 
         const datahubInstance = await datahub.deployed()
-        await datahubInstance.register(dataset, "0x1b9e1999bd3aede0f518ac01efbbc4c6397f311f8fb1b4d9a789b92440e87790", { from: node1 })
-        await datahubInstance.register(dataset, "0x2be97c3a6dff81e5db01463a44e2057d77cabb72c17510b523c759d237601940", { from: node2 })
-        await datahubInstance.register(dataset, "0x241074e8fd5a7b5b87c23b76a2ab58b48054d84971a204b6d3ca02b87475cec9", { from: node3 })
+        await datahubInstance.register(dataset, 0, "0x1b9e1999bd3aede0f518ac01efbbc4c6397f311f8fb1b4d9a789b92440e87790", { from: node1 })
+        await datahubInstance.register(dataset, 0, "0x2be97c3a6dff81e5db01463a44e2057d77cabb72c17510b523c759d237601940", { from: node2 })
+        await datahubInstance.register(dataset, 0, "0x241074e8fd5a7b5b87c23b76a2ab58b48054d84971a204b6d3ca02b87475cec9", { from: node3 })
     })
 
     after(async () => {
@@ -286,9 +286,9 @@ async function runTask(nodes) {
     await idInstance.join("http://node2", "node2", { from: node2 })
     await idInstance.join("http://node3", "node3", { from: node3 })
 
-    await datahubInstance.register(dataset, "0x1b9e1999bd3aede0f518ac01efbbc4c6397f311f8fb1b4d9a789b92440e87790", { from: node1 })
-    await datahubInstance.register(dataset, "0x2be97c3a6dff81e5db01463a44e2057d77cabb72c17510b523c759d237601940", { from: node2 })
-    await datahubInstance.register(dataset, "0x241074e8fd5a7b5b87c23b76a2ab58b48054d84971a204b6d3ca02b87475cec9", { from: node3 })
+    await datahubInstance.register(dataset, 0, "0x1b9e1999bd3aede0f518ac01efbbc4c6397f311f8fb1b4d9a789b92440e87790", { from: node1 })
+    await datahubInstance.register(dataset, 0, "0x2be97c3a6dff81e5db01463a44e2057d77cabb72c17510b523c759d237601940", { from: node2 })
+    await datahubInstance.register(dataset, 0, "0x241074e8fd5a7b5b87c23b76a2ab58b48054d84971a204b6d3ca02b87475cec9", { from: node3 })
     // create task
     const r1 = await hlrInstance.createTask(dataset, taskCommitment, enableVerify, tolerance, { from: node1 })
     const taskId = r1.logs[0].args[1]
@@ -377,6 +377,7 @@ contract("hlr verify", (accounts) => {
         ["0x30644e72e131a029b85045b68181585d2833e845ff9193037f6d4acba0804001", "0x000000000000000000000000000000000000000000000000000000000000001d", "0x30644e72e131a029b85045b68181585d2833e8395c03653d409383e2b4110001", "0x000000000000000000000000000000000000000000000000000000000000001d", "0x30644e72e131a029b85045b68181585d2833e84862f49a5543223ed6ff180001", "0x000000000000000000000000000000000000000000000000000000000000001d", "0x111da4b536325aca16982ce6fbcb52c06e6708b4976e0b0dbddb022776ff9ffc", "0x2be97c3a6dff81e5db01463a44e2057d77cabb72c17510b523c759d237601940"],
         ["0x0000000000000000000000000000000000000001ce482df1943d48e78d2b4000", "0x000000000000000000000000000000000000000000000000000000000000001d", "0x000000000000000000000000000000000000000afc760c73ff359d4927920000", "0x000000000000000000000000000000000000000000000000000000000000001d", "0x00000000000000000000000000000000000000000a2999e6cabec76bf2290000", "0x000000000000000000000000000000000000000000000000000000000000001d", "0x111da4b536325aca16982ce6fbcb52c06e6708b4976e0b0dbddb022776ff9ffc", "0x241074e8fd5a7b5b87c23b76a2ab58b48054d84971a204b6d3ca02b87475cec9"]
     ]
+    const samples = [10, 10, 12]
 
     it("verify", async () => {
         const hlrInstance = await hlr.deployed()
@@ -386,7 +387,7 @@ contract("hlr verify", (accounts) => {
             const node = accounts[i]
             const proof = proofs[i]
             const pubSignal = pubSignals[i]
-            const receipt = await hlrInstance.verify(taskId, verifierInstance.address, proof, pubSignal, { from: node })
+            const receipt = await hlrInstance.verify(taskId, verifierInstance.address, proof, pubSignal, 0, samples[i], { from: node })
 
             const taskMemeberEvent = receipt.logs[0]
 
@@ -411,8 +412,8 @@ contract("hlr verify", (accounts) => {
         const hlrInstance = await hlr.deployed()
         const verifierInstance = await verifier.deployed()
 
-        await assert.isRejected(hlrInstance.verify(taskId, verifierInstance.address, proofs[0], pubSignals[0], { from: node1 }))
-        await assert.isRejected(hlrInstance.verify(taskId, verifierInstance.address, proofs[0], pubSignals[0], { from: accounts[4] }))
+        await assert.isRejected(hlrInstance.verify(taskId, verifierInstance.address, proofs[0], pubSignals[0], 0, samples[0], { from: node1 }))
+        await assert.isRejected(hlrInstance.verify(taskId, verifierInstance.address, proofs[0], pubSignals[0], 0, samples[0], { from: accounts[4] }))
     })
 })
 
@@ -440,12 +441,13 @@ contract("hlr verify failed ", (accounts) => {
         ["0x30644e72e131a029b85045b68181585d2833e845ff9193037f6d4acba0804001", "0x000000000000000000000000000000000000000000000000000000000000001d", "0x30644e72e131a029b85045b68181585d2833e8395c03653d409383e2b4110001", "0x000000000000000000000000000000000000000000000000000000000000001d", "0x30644e72e131a029b85045b68181585d2833e84862f49a5543223ed6ff180001", "0x000000000000000000000000000000000000000000000000000000000000001d", "0x111da4b536325aca16982ce6fbcb52c06e6708b4976e0b0dbddb022776ff9ffc", "0x2be97c3a6dff81e5db01463a44e2057d77cabb72c17510b523c759d237601940"],
         ["0x0000000000000000000000000000000000000001ce482df1943d48e78d2b4000", "0x000000000000000000000000000000000000000000000000000000000000001d", "0x000000000000000000000000000000000000000afc760c73ff359d4927920000", "0x000000000000000000000000000000000000000000000000000000000000001d", "0x00000000000000000000000000000000000000000a2999e6cabec76bf2290000", "0x000000000000000000000000000000000000000000000000000000000000001d", "0x111da4b536325aca16982ce6fbcb52c06e6708b4976e0b0dbddb022776ff9ffc", "0x241074e8fd5a7b5b87c23b76a2ab58b48054d84971a204b6d3ca02b87475cec9"]
     ]
+    const samples = [0, 0, 0]
 
     it("verify", async () => {
         const hlrInstance = await hlr.deployed()
         const verifierInstance = await verifier.deployed()
 
-        const receipt = await hlrInstance.verify(taskId, verifierInstance.address, proofs[0], pubSignals[1], { from: node1 })
+        const receipt = await hlrInstance.verify(taskId, verifierInstance.address, proofs[0], pubSignals[1], 0, samples[0], { from: node1 })
         const taskMemeberEvent = receipt.logs[0]
         assert.isNotTrue(taskMemeberEvent.args[2])
         const taskEvent = receipt.logs[1]
@@ -467,6 +469,6 @@ contract("hlr verify failed ", (accounts) => {
         const hlrInstance = await hlr.deployed()
         const verifierInstance = await verifier.deployed()
 
-        await assert.isRejected(hlrInstance.verify(taskId, verifierInstance.address, proofs[1], pubSignals[1], { from: node2 }))
+        await assert.isRejected(hlrInstance.verify(taskId, verifierInstance.address, proofs[1], pubSignals[1], 0, samples[1], { from: node2 }))
     })
 })
