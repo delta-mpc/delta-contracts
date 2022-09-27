@@ -30,7 +30,7 @@ contract DataHub {
         } else if (index == datahub[msg.sender][name].length - 1) {
             datahub[msg.sender][name][index] = commitment;
         } else {
-            revert("You cannot update other data blocks except the last block");
+            revert("You can only update the last block or create a new block after it");
         }
 
         emit DataRegistered(

@@ -94,12 +94,14 @@ contract HLR {
         mapping(address => bool) unfinishedClients;
         uint256 unfinishedCount;
         bool valid;
+        bool confirmed;
     }
 
     struct ExtCallVerifierState {
         address[] unfinishedClients;
         address[] invalidClients;
         bool valid;
+        bool confirmed;
     }
 
     // event for EVM logging
@@ -144,8 +146,8 @@ contract HLR {
 
     // triggered when client call verify method
     event TaskMemberVerified(bytes32 taskId, address addr, bool verified);
-    // triggered when all clients pass the verification or any client is rejected by the verification
-    event TaskVerified(bytes32 taskId, bool verified);
+    // triggered when task verification is confirmed
+    event TaskVerificationConfirmed(bytes32 taskId);
 
     // modifier to check if caller is owner
     modifier isOwner() {
@@ -836,14 +838,12 @@ contract HLR {
                     state.valid = false;
                     state.invalidClients.push(msg.sender);
                     emit TaskMemberVerified(taskId, msg.sender, false);
-                    emit TaskVerified(taskId, false);
                     return false;
                 }
             } catch {
                 state.valid = false;
                 state.invalidClients.push(msg.sender);
                 emit TaskMemberVerified(taskId, msg.sender, false);
-                emit TaskVerified(taskId, false);
                 return false;
             }
         }
@@ -887,7 +887,6 @@ contract HLR {
                     state.valid = false;
                     state.invalidClients.push(msg.sender);
                     emit TaskMemberVerified(taskId, msg.sender, false);
-                    emit TaskVerified(taskId, false);
                     return false;
                 }
             }
@@ -907,7 +906,6 @@ contract HLR {
                 state.valid = false;
                 state.invalidClients.push(msg.sender);
                 emit TaskMemberVerified(taskId, msg.sender, false);
-                emit TaskVerified(taskId, false);
                 return false;
             }
         }
@@ -925,21 +923,16 @@ contract HLR {
                     state.valid = false;
                     state.invalidClients.push(msg.sender);
                     emit TaskMemberVerified(taskId, msg.sender, false);
-                    emit TaskVerified(taskId, false);
                     return false;
                 }
             } catch {
                 state.valid = false;
                 state.invalidClients.push(msg.sender);
                 emit TaskMemberVerified(taskId, msg.sender, false);
-                emit TaskVerified(taskId, false);
                 return false;
             }
         }
         emit TaskMemberVerified(taskId, msg.sender, true);
-        if (state.unfinishedCount == 0) {
-            emit TaskVerified(taskId, true);
-        }
 
         return true;
     }
@@ -968,8 +961,17 @@ contract HLR {
             ExtCallVerifierState({
                 unfinishedClients: unfinishedClients,
                 invalidClients: state.invalidClients,
-                valid: state.valid
+                valid: state.valid,
+                confirmed: state.confirmed
             });
+    }
+
+    function confirmVerification(bytes32 taskId) public taskExists(taskId) taskOwner(taskId) {
+        require(verifierStates[taskId].unfinishedCount == 0, "Verification is not finished");
+        require(verifierStates[taskId].valid, "Verification is already failed");
+        require(!verifierStates[taskId].confirmed, "Verification has already been confirmed");
+        verifierStates[taskId].confirmed = true;
+        emit TaskVerificationConfirmed(taskId);
     }
 
     function setMaxWeightCommitmentLength(uint64 maxLength) public isOwner {

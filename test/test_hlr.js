@@ -392,10 +392,6 @@ contract("hlr verify", (accounts) => {
             const taskMemeberEvent = receipt.logs[0]
 
             assert.isTrue(taskMemeberEvent.args[2])
-            if (i == 2) {
-                const taskEvent = receipt.logs[1]
-                assert.isTrue(taskEvent.args[1])
-            }
         }
     })
 
@@ -406,6 +402,19 @@ contract("hlr verify", (accounts) => {
         assert.lengthOf(state.unfinishedClients, 0)
         assert.lengthOf(state.invalidClients, 0)
         assert.isTrue(state.valid)
+        assert.isNotTrue(state.confirmed)
+    })
+
+    it("confirm verification", async () => {
+        const hlrInstance = await hlr.deployed()
+
+        const receipt = await hlrInstance.confirmVerification(taskId, { from: node1 })
+
+        const confirmedEvent = receipt.logs[0]
+        assert.strictEqual(confirmedEvent.args[0], taskId)
+
+        const state = await hlrInstance.getVerifierState.call(taskId)
+        assert.isTrue(state.confirmed)
     })
 
     it("verify rejected", async () => {
@@ -450,8 +459,6 @@ contract("hlr verify failed ", (accounts) => {
         const receipt = await hlrInstance.verify(taskId, verifierInstance.address, proofs[0], pubSignals[1], 0, samples[0], { from: node1 })
         const taskMemeberEvent = receipt.logs[0]
         assert.isNotTrue(taskMemeberEvent.args[2])
-        const taskEvent = receipt.logs[1]
-        assert.isNotTrue(taskEvent.args[1])
     })
 
     it("get verifier state", async () => {
@@ -470,5 +477,10 @@ contract("hlr verify failed ", (accounts) => {
         const verifierInstance = await verifier.deployed()
 
         await assert.isRejected(hlrInstance.verify(taskId, verifierInstance.address, proofs[1], pubSignals[1], 0, samples[1], { from: node2 }))
+    })
+
+    it("confirm verification rejected", async () => {
+        const hlrInstance = await hlr.deployed()
+        await assert.isRejected(hlrInstance.confirmVerification(taskId))
     })
 })
