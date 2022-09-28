@@ -25,13 +25,12 @@ contract DataHub {
         uint256 index,
         bytes32 commitment
     ) public {
-        if (index == datahub[msg.sender][name].length) {
-            datahub[msg.sender][name].push(commitment);
-        } else if (index == datahub[msg.sender][name].length - 1) {
-            datahub[msg.sender][name][index] = commitment;
-        } else {
-            revert("You can only update the last block or create a new block after it");
+        if (index >= datahub[msg.sender][name].length) {
+            for (uint256 i = datahub[msg.sender][name].length; i <= index; i++) {
+                datahub[msg.sender][name].push();
+            }
         }
+        datahub[msg.sender][name][index] = commitment;
 
         emit DataRegistered(
             msg.sender,
