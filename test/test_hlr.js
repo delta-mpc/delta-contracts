@@ -383,12 +383,16 @@ contract("hlr verify", (accounts) => {
         const hlrInstance = await hlr.deployed()
         const verifierInstance = await verifier.deployed()
 
+        const futs = []
         for (let i = 0; i < 3; i++) {
             const node = accounts[i]
             const proof = proofs[i]
             const pubSignal = pubSignals[i]
-            const receipt = await hlrInstance.verify(taskId, verifierInstance.address, proof, pubSignal, 0, samples[i], { from: node })
-
+            const fut = hlrInstance.verify(taskId, verifierInstance.address, proof, pubSignal, 0, samples[i], { from: node })
+            futs.push(fut)
+        }
+        const receipts = await Promise.all(futs)
+        for (const receipt of receipts) {
             const taskMemeberEvent = receipt.logs[0]
 
             assert.isTrue(taskMemeberEvent.args[2])
