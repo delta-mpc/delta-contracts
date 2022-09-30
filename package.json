@@ -20,6 +20,7 @@
     "@grpc/proto-loader": "^0.5.5",
     "@poanet/solidity-flattener": "^3.0.6",
     "big-integer": "^1.6.47",
+    "chai-as-promised": "^7.1.1",
     "fs": "^0.0.1-security",
     "google-protobuf": "^3.14.0",
     "hex-to-binary": "^1.0.1",

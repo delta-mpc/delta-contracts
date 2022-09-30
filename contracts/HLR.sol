@@ -88,9 +88,20 @@ contract HLR {
     struct VerifierState {
         uint256[] gradients;
         uint256 precision;
+        uint256 samples;
+        address[] clients;
+        address[] invalidClients;
         mapping(address => bool) unfinishedClients;
         uint256 unfinishedCount;
         bool valid;
+        bool confirmed;
+    }
+
+    struct ExtCallVerifierState {
+        address[] unfinishedClients;
+        address[] invalidClients;
+        bool valid;
+        bool confirmed;
     }
 
     // event for EVM logging
@@ -135,8 +146,8 @@ contract HLR {
 
     // triggered when client call verify method
     event TaskMemberVerified(bytes32 taskId, address addr, bool verified);
-    // triggered when all clients pass the verification or any client is rejected by the verification
-    event TaskVerified(bytes32 taskId, bool verified);
+    // triggered when task verification is confirmed
+    event TaskVerificationConfirmed(bytes32 taskId);
 
     // modifier to check if caller is owner
     modifier isOwner() {
@@ -209,10 +220,10 @@ contract HLR {
     function createTask(
         string calldata dataSet,
         bytes32 commitment,
-        string calldata taskType,
         bool enableVerify,
         uint256 tolerance
     ) public payable returns (bytes32 taskId) {
+        string memory taskType = "hlr";
         bytes32 task_id = keccak256(
             abi.encode(block.number, msg.sender, dataSet, commitment, taskType)
         );
@@ -257,8 +268,10 @@ contract HLR {
             VerifierState storage state = verifierStates[taskId];
             for (uint256 i = 0; i < finalRound.finishedAddrs.length; i++) {
                 state.unfinishedClients[finalRound.finishedAddrs[i]] = true;
+                state.clients.push(finalRound.finishedAddrs[i]);
             }
             state.unfinishedCount = finalRound.finishedAddrs.length;
+            state.valid = true;
         }
         emit TaskFinished(taskId);
     }
@@ -427,8 +440,8 @@ contract HLR {
      */
     function getResultCommitment(
         bytes32 taskId,
-        address clientaddress,
-        uint64 round
+        uint64 round,
+        address clientaddress
     )
         public
         view
@@ -803,87 +816,162 @@ contract HLR {
         bytes32 taskId,
         address verifierAddr,
         bytes memory proof,
-        uint256[] memory pubSignals
+        uint256[] memory pubSignals,
+        uint256 blockIndex,
+        uint256 samples
     ) public taskExists(taskId) returns (bool) {
-        Verifier v = Verifier(verifierAddr);
-        bool valid = v.verifyProof(proof, pubSignals);
-        if (!valid) {
-            emit TaskMemberVerified(taskId, msg.sender, false);
-            emit TaskVerified(taskId, false);
-            return false;
-        }
-
-        bytes32 weightCommitment = bytes32(pubSignals[pubSignals.length - 2]);
-        bytes32 dataCommitment = bytes32(pubSignals[pubSignals.length - 1]);
-
         Task storage task = createdTasks[taskId];
         require(task.finished);
-        // check gradient norm
         VerifierState storage state = verifierStates[taskId];
         require(state.valid);
         require(state.unfinishedClients[msg.sender]);
-        state.unfinishedClients[msg.sender] = true;
+        require(state.unfinishedCount > 0);
+        state.unfinishedClients[msg.sender] = false;
         state.unfinishedCount--;
+        uint256 q;
 
-        for (uint256 i = 0; i < pubSignals.length - 2; i++) {
-            if (i % 2 == 0) {
-                state.gradients.push(pubSignals[i]);
-            } else {
-                if (state.precision == 0) {
-                    state.precision = pubSignals[i];
-                    require(state.precision > task.tolerance);
-                } else {
-                    require(state.precision == pubSignals[i]);
+        {
+            Verifier v = Verifier(verifierAddr);
+            q = v.q();
+            try v.verifyProof(proof, pubSignals) returns (bool valid) {
+                if (!valid) {
+                    state.valid = false;
+                    state.invalidClients.push(msg.sender);
+                    emit TaskMemberVerified(taskId, msg.sender, false);
+                    return false;
                 }
-            }
-        }
-
-        if (state.unfinishedCount == 0) {
-            uint256 minGradient;
-            for (uint256 i = 0; i < state.gradients.length; i++) {
-                uint256 abs = v.q() - state.gradients[i];
-                if (state.gradients[i] < abs) {
-                    abs = state.gradients[i];
-                }
-                if (abs < minGradient) {
-                    minGradient = abs;
-                }
-            }
-            if (minGradient >= 10**(state.precision - task.tolerance)) {
+            } catch {
                 state.valid = false;
+                state.invalidClients.push(msg.sender);
                 emit TaskMemberVerified(taskId, msg.sender, false);
-                emit TaskVerified(taskId, false);
                 return false;
             }
         }
 
-        // check weight commitment
-        RoundModelCommitments[] storage cmmts = roundModelCommitments[taskId];
-        require(cmmts.length > task.currentRound);
-        RoundModelCommitments storage cmmt = cmmts[task.currentRound];
-        if (cmmt.weightCommitment != weightCommitment) {
-            state.valid = false;
-            emit TaskMemberVerified(taskId, msg.sender, false);
-            emit TaskVerified(taskId, false);
-            return false;
+        {
+            // check gradient norm
+            state.samples = state.samples + samples;
+            for (uint256 i = 0; i < pubSignals.length - 2; i++) {
+                if (i % 2 == 0) {
+                    uint256 idx = i / 2;
+                    if (state.gradients.length < idx + 1) {
+                        state.gradients.push(pubSignals[i]);
+                    } else {
+                        state.gradients[idx] += pubSignals[i];
+                    }
+                } else {
+                    if (state.precision == 0) {
+                        state.precision = pubSignals[i];
+                        require(state.precision > task.tolerance);
+                    } else {
+                        require(state.precision == pubSignals[i]);
+                    }
+                }
+            }
+
+            if (state.unfinishedCount == 0) {
+                uint256 minGradient;
+                for (uint256 i = 0; i < state.gradients.length; i++) {
+                    uint256 abs = q - state.gradients[i];
+                    if (state.gradients[i] < abs) {
+                        abs = state.gradients[i];
+                    }
+                    if (abs < minGradient) {
+                        minGradient = abs;
+                    }
+                }
+                if (
+                    minGradient >=
+                    (10**(state.precision - task.tolerance) * state.samples)
+                ) {
+                    state.valid = false;
+                    state.invalidClients.push(msg.sender);
+                    emit TaskMemberVerified(taskId, msg.sender, false);
+                    return false;
+                }
+            }
+        }
+        {
+            bytes32 weightCommitment = bytes32(
+                pubSignals[pubSignals.length - 2]
+            );
+
+            // check weight commitment
+            RoundModelCommitments[] storage cmmts = roundModelCommitments[
+                taskId
+            ];
+            require(cmmts.length > task.currentRound);
+            RoundModelCommitments storage cmmt = cmmts[task.currentRound];
+            if (cmmt.weightCommitment != weightCommitment) {
+                state.valid = false;
+                state.invalidClients.push(msg.sender);
+                emit TaskMemberVerified(taskId, msg.sender, false);
+                return false;
+            }
         }
         // check data commitment
-        if (
-            dataCommitment !=
-            dataContract.getDataCommitment(msg.sender, task.dataSet)
-        ) {
-            state.valid = false;
-            emit TaskMemberVerified(taskId, msg.sender, false);
-            emit TaskVerified(taskId, false);
-            return false;
+        {
+            bytes32 dataCommitment = bytes32(pubSignals[pubSignals.length - 1]);
+            try
+                dataContract.getDataCommitment(
+                    msg.sender,
+                    task.dataSet,
+                    blockIndex
+                )
+            returns (bytes32 trueDataCommitment) {
+                if (dataCommitment != trueDataCommitment) {
+                    state.valid = false;
+                    state.invalidClients.push(msg.sender);
+                    emit TaskMemberVerified(taskId, msg.sender, false);
+                    return false;
+                }
+            } catch {
+                state.valid = false;
+                state.invalidClients.push(msg.sender);
+                emit TaskMemberVerified(taskId, msg.sender, false);
+                return false;
+            }
         }
-
         emit TaskMemberVerified(taskId, msg.sender, true);
-        if (state.unfinishedCount == 0) {
-            emit TaskVerified(taskId, true);
-        }
 
         return true;
+    }
+
+    function getVerifierState(bytes32 taskId)
+        public
+        view
+        taskExists(taskId)
+        returns (ExtCallVerifierState memory)
+    {
+        VerifierState storage state = verifierStates[taskId];
+        address[] memory unfinishedClients = new address[](
+            state.unfinishedCount
+        );
+        if (state.unfinishedCount > 0) {
+            uint256 idx = 0;
+            for (uint256 i = 0; i < state.clients.length; i++) {
+                address client = state.clients[i];
+                if (state.unfinishedClients[client]) {
+                    unfinishedClients[idx] = client;
+                    idx++;
+                }
+            }
+        }
+        return
+            ExtCallVerifierState({
+                unfinishedClients: unfinishedClients,
+                invalidClients: state.invalidClients,
+                valid: state.valid,
+                confirmed: state.confirmed
+            });
+    }
+
+    function confirmVerification(bytes32 taskId) public taskExists(taskId) taskOwner(taskId) {
+        require(verifierStates[taskId].unfinishedCount == 0, "Verification is not finished");
+        require(verifierStates[taskId].valid, "Verification is already failed");
+        require(!verifierStates[taskId].confirmed, "Verification has already been confirmed");
+        verifierStates[taskId].confirmed = true;
+        emit TaskVerificationConfirmed(taskId);
     }
 
     function setMaxWeightCommitmentLength(uint64 maxLength) public isOwner {
