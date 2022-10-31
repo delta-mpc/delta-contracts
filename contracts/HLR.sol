@@ -227,7 +227,7 @@ contract HLR {
         bytes32 task_id = keccak256(
             abi.encode(block.number, msg.sender, dataSet, commitment, taskType)
         );
-        IdentityContract.Node memory node = idContract.getNodeInfo(msg.sender);
+        IdentityContract.NodeInfo memory node = idContract.getNodeInfo(msg.sender);
         createdTasks[task_id] = Task({
             creatorUrl: node.url,
             creator: msg.sender,
