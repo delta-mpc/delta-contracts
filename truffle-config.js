@@ -1,8 +1,8 @@
 require("dotenv").config()
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 
-const DELTA_PKEY = process.env.DELTA_PKEY;
-const DELTA_ADDR = process.env.DELTA_ADDR;
+const DELTA_PKEY = process.env.DELTA_PKEY || "";
+const DELTA_ADDR = process.env.DELTA_ADDR || "";
 
 module.exports = {
   networks: {
