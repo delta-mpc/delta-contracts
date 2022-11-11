@@ -233,11 +233,6 @@
     "crc-32" "^1.2.0"
     "ethereumjs-util" "^7.1.1"
 
-"@ethereumjs/rlp@^4.0.0-beta.2":
-  "integrity" "sha512-LM4jS5n33bJN60fM5EC8VeyhUgga6/DjCPBV2vWjnfVtobqtOiNC4SQ1MRFqyBSmJGGdB533JZWewyvlcdJtkQ=="
-  "resolved" "https://registry.npmmirror.com/@ethereumjs/rlp/-/rlp-4.0.0.tgz"
-  "version" "4.0.0"
-
 "@ethereumjs/tx@^3.2.1", "@ethereumjs/tx@^3.3.0", "@ethereumjs/tx@^3.3.2":
   "integrity" "sha512-6AaJhwg4ucmwTvw/1qLaZUX5miWrwZ4nLOUsKyb/HtzS3BMw/CasKhdi1ims9mBKeK9sOJCH4qGKOBGyJCeeog=="
   "resolved" "https://registry.npmjs.org/@ethereumjs/tx/-/tx-3.3.2.tgz"
@@ -245,15 +240,6 @@
   dependencies:
     "@ethereumjs/common" "^2.5.0"
     "ethereumjs-util" "^7.1.2"
-
-"@ethereumjs/util@^8.0.2":
-  "integrity" "sha512-b1Fcxmq+ckCdoLPhVIBkTcH8szigMapPuEmD8EDakvtI5Na5rzmX1sBW73YQqaPc7iUxGCAzZP1LrFQ7aEMugA=="
-  "resolved" "https://registry.npmmirror.com/@ethereumjs/util/-/util-8.0.2.tgz"
-  "version" "8.0.2"
-  dependencies:
-    "@ethereumjs/rlp" "^4.0.0-beta.2"
-    "async" "^3.2.4"
-    "ethereum-cryptography" "^1.1.2"
 
 "@ethersproject/abi@^5.6.3":
   "integrity" "sha512-351ktp42TiRcYB3H1OP8yajPeAQstMW/yCFokj/AthP9bLHzQFPlOrxOcwYEDkUAICmOHljvN4K39OMTMUa9RA=="
@@ -821,11 +807,6 @@
   "version" "2.6.4"
   dependencies:
     "lodash" "^4.17.14"
-
-"async@^3.2.4":
-  "integrity" "sha512-iAB+JbDEGXhyIUavoDl9WP/Jj106Kz9DEn1DPgYw5ruDn0e3Wgi3sKFm55sASdGBNOQB8F59d9qQ7deqrHA8wQ=="
-  "resolved" "https://registry.npmmirror.com/async/-/async-3.2.4.tgz"
-  "version" "3.2.4"
 
 "asynckit@^0.4.0":
   "integrity" "sha1-x57Zf380y48robyXkLzDZkdLS3k="
@@ -1817,16 +1798,6 @@
     "scrypt-js" "^3.0.0"
     "secp256k1" "^4.0.1"
     "setimmediate" "^1.0.5"
-
-"ethereum-cryptography@^1.1.2":
-  "integrity" "sha512-XDSJlg4BD+hq9N2FjvotwUET9Tfxpxc3kWGE2AqUG5vcbeunnbImVk3cj6e/xT3phdW21mE8R5IugU4fspQDcQ=="
-  "resolved" "https://registry.npmmirror.com/ethereum-cryptography/-/ethereum-cryptography-1.1.2.tgz"
-  "version" "1.1.2"
-  dependencies:
-    "@noble/hashes" "1.1.2"
-    "@noble/secp256k1" "1.6.3"
-    "@scure/bip32" "1.1.0"
-    "@scure/bip39" "1.1.0"
 
 "ethereum-cryptography@1.1.2":
   "integrity" "sha512-XDSJlg4BD+hq9N2FjvotwUET9Tfxpxc3kWGE2AqUG5vcbeunnbImVk3cj6e/xT3phdW21mE8R5IugU4fspQDcQ=="
